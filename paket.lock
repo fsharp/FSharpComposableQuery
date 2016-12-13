@@ -1,0 +1,9 @@
+NUGET
+  remote: http://api.nuget.org/v3/index.json
+    NuGet.CommandLine (3.4.3)
+    NUnit (2.6.3) - framework: >= net40
+
+GROUP build
+NUGET
+  remote: http://api.nuget.org/v3/index.json
+    FAKE (4.46.1)

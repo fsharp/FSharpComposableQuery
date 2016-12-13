@@ -2,7 +2,7 @@
 // FAKE build script 
 // --------------------------------------------------------------------------------------
 
-#r @"packages/FAKE/tools/FakeLib.dll"
+#r @"packages/build/FAKE/tools/FakeLib.dll"
 open Fake 
 open Fake.Git
 open Fake.AssemblyInfoFile
@@ -76,12 +76,8 @@ Target "AssemblyInfo" (fun _ ->
 )
 
 // --------------------------------------------------------------------------------------
-// Clean build results & restore NuGet packages
+// Clean build results 
 
-Target "RestorePackages" (fun _ ->
-    !! "./**/packages.config"
-    |> Seq.iter (RestorePackage (fun p -> { p with ToolPath = "./.nuget/NuGet.exe" }))
-)
 
 Target "Clean" (fun _ ->
     CleanDirs [buildDir; "temp"]
@@ -184,10 +180,25 @@ Target "All" DoNothing
 // --------------------------------------------------------------------------------------
 // Run 'Build' target by default. Invoke 'build <Target>' to override
 
-"Clean" ==> "RestorePackages" ==> "AssemblyInfo" ==> "Build"
-"AssemblyInfo" ==> "BuildTest" ==> "RunTests" 
-"CleanDocs" ==> "GenerateDocs" ==> "ReleaseDocs" 
-"Build" ==> "RunTests" ==> "GenerateDocs" ==> "All"
-"RunTests" ==> "NuGet" ==> "Release"
+"Clean" 
+    ==> "AssemblyInfo" 
+    ==> "Build"
+
+"AssemblyInfo" 
+    ==> "BuildTest" 
+    ==> "RunTests"
+
+"CleanDocs" 
+    ==> "GenerateDocs" 
+    ==> "ReleaseDocs"
+
+"Build" 
+    ==> "RunTests" 
+    ==> "GenerateDocs" 
+    ==> "All"
+
+"RunTests" 
+    ==> "NuGet" 
+    ==> "Release"
 
 RunTargetOrDefault "Build"

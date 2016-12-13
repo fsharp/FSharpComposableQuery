@@ -9,3 +9,10 @@ group build
 
     source https://api.nuget.org/v3/index.json
     nuget FAKE
+nuget FSharp.Formatting
+
+group test
+source https://www.nuget.org/api/v2
+
+nuget SQLprovider
+nuget System.Data.SQLite.Core

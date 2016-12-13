@@ -7,3 +7,15 @@ GROUP build
 NUGET
   remote: http://api.nuget.org/v3/index.json
     FAKE (4.46.1)
+    FSharp.Compiler.Service (2.0.0.6)
+    FSharp.Formatting (2.14.4)
+      FSharp.Compiler.Service (2.0.0.6)
+      FSharpVSPowerTools.Core (>= 2.3 < 2.4)
+    FSharpVSPowerTools.Core (2.3)
+      FSharp.Compiler.Service (>= 2.0.0.3)
+
+GROUP test
+NUGET
+  remote: https://www.nuget.org/api/v2
+    SQLProvider (1.0.37)
+    System.Data.SQLite.Core (1.0.103)

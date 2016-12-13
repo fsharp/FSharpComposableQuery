@@ -1,13 +1,13 @@
 ﻿namespace FSharpComposableQuery.Tests
 
 open System
-open System.Data.Linq.SqlClient
 open System.Linq
 open Microsoft.FSharp.Data.TypeProviders
 open Microsoft.FSharp.Linq
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
 open NUnit.Framework
+open FSharp.Data.Sql
 
 open FSharpComposableQuery
 
@@ -21,9 +21,16 @@ module Simple =
     [<Literal>]
     let dbConfigPath = "db.config"
     
-    type internal schema = SqlDataConnection<ConnectionStringName="QueryConnectionString", ConfigFile=dbConfigPath>
+//    type internal schema = SqlDataConnection<ConnectionStringName="QueryConnectionString", ConfigFile=dbConfigPath>
 
-
+    let [<Literal>] connectionString = "QueryConnectionString"
+    let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net451"
+    type sql = SqlDataProvider<
+                Common.DatabaseProviderTypes.SQLITE, 
+                SQLiteLibrary = Common.SQLiteLibrary.SystemDataSQLite,
+                ConnectionString = connectionString, 
+                ResolutionPath = resolutionPath,                 
+                CaseSensitivityChange = Common.CaseSensitivityChange.ORIGINAL>
     [<TestFixture>]
     type TestClass() = 
 

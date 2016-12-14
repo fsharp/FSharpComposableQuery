@@ -266,7 +266,7 @@ module Simple =
             tag "sumByNullable query operator"
             let q = <@ query {
                 for student in db.Student do
-                sumByNullable student.Age
+                sumByNullable (Nullable student.Age)
                 } @>
             Utils.Run q
 
@@ -277,7 +277,7 @@ module Simple =
             tag "minByNullable"
             let q = <@ query {
                 for student in db.Student do
-                minByNullable student.Age
+                minByNullable (Nullable student.Age)
                 } @>
             Utils.Run q
 
@@ -288,7 +288,7 @@ module Simple =
             tag "maxByNullable"
             let q = <@ query {
                 for student in db.Student do
-                maxByNullable student.Age
+                maxByNullable (Nullable student.Age)
                 } @>
             Utils.Run q
 
@@ -310,7 +310,7 @@ module Simple =
             tag "averageByNullable"
             let q = <@ query {
                 for student in db.Student do
-                averageByNullable (Nullable.float student.Age)
+                averageByNullable (Nullable <| float student.Age)
                 } @>
             Utils.Run q
 
@@ -745,7 +745,7 @@ module Simple =
             tag "Selecting students with age between 10 and 15."
             let q = <@ query {
                     for student in db.Student do
-                    where (student.Age >= 10 && student.Age.Value < 15)
+                    where (student.Age >= 10 && student.Age < 15)
                     select student
                 } @>
             Utils.Run q
@@ -770,7 +770,7 @@ module Simple =
             let q = <@ query {
                     for n in db.Student do
                     where (n.Age = 12 || n.Age = 13)
-                    sortByNullableDescending n.Age
+                    sortByNullableDescending (Nullable n.Age)
                     select n
                 } @>
             Utils.Run q

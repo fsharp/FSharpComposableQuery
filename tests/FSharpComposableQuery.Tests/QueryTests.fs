@@ -1,12 +1,19 @@
-﻿namespace FSharpComposableQuery.Tests
+﻿#if INTERACTIVE
+#r "System.Linq"
+#r "System.Data"
+#r "System.Data.Linq"
+#r "../../bin/FSharpComposableQuery.dll"
+#r "../../packages/test/System.Data.Sqlite.Core/lib/net46/System.Data.SQLite.dll"
+#r "../../packages/test/SQLProvider/lib/FSharp.Data.SqlProvider.dll"
+#r "../../packages/test/NUnit/lib/net45/nunit.framework.dll"
+#else
+namespace FSharpComposableQuery.Tests
+#endif
+
 
 open System
 open System.Data.Linq.SqlClient
 open System.Linq
-open Microsoft.FSharp.Data.TypeProviders
-open Microsoft.FSharp.Linq
-open Microsoft.FSharp.Quotations
-open Microsoft.FSharp.Quotations.Patterns
 open NUnit.Framework
 open FSharp.Data.Sql
 
@@ -15,7 +22,7 @@ open FSharpComposableQuery
 module QueryTests = 
 
     let [<Literal>] connectionString = "DataSource=" + __SOURCE_DIRECTORY__ + @"/../databases/simple.db;" + "Version=3;foreign keys = true"
-    let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net46"
+    let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/lib/net46"
     type sql = SqlDataProvider<
                 Common.DatabaseProviderTypes.SQLITE
             ,   SQLiteLibrary = Common.SQLiteLibrary.SystemDataSQLite
@@ -156,7 +163,7 @@ module QueryTests =
     let ``maxBy query operator.``() = 
         tag "maxBy query operator."
         let student6 = query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
                 maxBy student.StudentId
         }
         ignore 0
@@ -167,7 +174,7 @@ module QueryTests =
     let ``groupBy query operator.``() = 
         tag "groupBy query operator."
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
                 groupBy student.Age into g
                 select (g.Key, g.Count())
         }
@@ -178,7 +185,7 @@ module QueryTests =
     let ``sortBy query operator.``() = 
         tag "sortBy query operator."
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
                 sortBy student.Name
                 select student
         }
@@ -189,7 +196,7 @@ module QueryTests =
     let ``sortByDescending query operator.``() = 
         tag "sortByDescending query operator."
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
                 sortByDescending student.Name
                 select student
         }
@@ -226,7 +233,7 @@ module QueryTests =
     let ``groupValBy query operator.``() = 
         tag "groupValBy query operator."
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
                 groupValBy student.Name student.Age into g
                 select (g, g.Key, g.Count())
         }
@@ -269,7 +276,7 @@ module QueryTests =
     let ``averageBy``() = 
         tag "averageBy"
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
                 averageBy (float student.StudentId)
         }
         |> printfn "Average student ID: %f"
@@ -279,7 +286,7 @@ module QueryTests =
     let ``averageByNullable``() = 
         tag "averageByNullable"
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
             averageByNullable (Nullable (float student.Age))
             }
         |> (fun avg -> printfn "Average age: %s" (printNullable avg))
@@ -299,7 +306,7 @@ module QueryTests =
     let ``all query operator``() = 
         tag "all query operator"
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
             all (SqlMethods.Like(student.Name, "%,%"))
         }
         |> printfn "Do all students have a comma in the name? %b"
@@ -381,7 +388,7 @@ module QueryTests =
     let ``sortByNullable query operator``() = 
         tag "sortByNullable query operator"
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
             sortByNullable (Nullable student.Age)
             select student
         }
@@ -393,7 +400,7 @@ module QueryTests =
     let ``sortByNullableDescending query operator``() = 
         tag "sortByNullableDescending query operator"
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
             sortByNullableDescending (Nullable student.Age)
             select student
         }
@@ -405,7 +412,7 @@ module QueryTests =
     let ``thenByNullable query operator``() = 
         tag "thenByNullable query operator"
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
             sortBy student.Name
             thenByNullable (Nullable student.Age)
             select student
@@ -418,7 +425,7 @@ module QueryTests =
     let ``thenByNullableDescending query operator``() = 
         tag "thenByNullableDescending query operator"
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
             sortBy student.Name
             thenByNullableDescending (Nullable student.Age)
             select student
@@ -454,7 +461,7 @@ module QueryTests =
     let ``Exists.``() = 
         tag "Exists."
         query {
-                for student in db.Student do
+                for student in db.Student.AsEnumerable() do
                 where (ExtraTopLevelOperators.query 
                     { for courseSelection in db.CourseSelection do
                         exists (courseSelection.StudentId = student.StudentId) })
@@ -467,7 +474,7 @@ module QueryTests =
     let ``Exists (bug).``() = 
         tag "Exists (bug)."
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
                 where (query 
                     { for courseSelection in db.CourseSelection do
                         exists (courseSelection.StudentId = student.StudentId) })
@@ -478,7 +485,7 @@ module QueryTests =
     let ``Group by age and count``() = 
         tag "Group by age and count"
         query {
-                for n in db.Student do
+                for n in db.Student.AsEnumerable() do
                 groupBy n.Age into g
                 select (g.Key, g.Count())
         }
@@ -489,7 +496,7 @@ module QueryTests =
     let ``Group value by age.``() = 
         tag "Group value by age."
         query {
-                for n in db.Student do
+                for n in db.Student.AsEnumerable() do
                 groupValBy n.Age n.Age into g
                 select (g.Key, g.Count())
             }
@@ -504,7 +511,7 @@ module QueryTests =
     let ``Group students by age where age > 10.``() = 
         tag "Group students by age where age > 10."
         query {
-                for student in db.Student do
+                for student in db.Student.AsEnumerable() do
                 groupBy student.Age into g
                 where ( g.Key > 10)
                 select (g, g.Key)
@@ -518,7 +525,7 @@ module QueryTests =
     let ``Group students by age and print counts of number of students at each age with more than 1 student.``() = 
         tag "Group students by age and print counts of number of students at each age with more than 1 student."
         query {
-                for student in db.Student do
+                for student in db.Student.AsEnumerable() do
                 groupBy student.Age into group
                 where (group.Count() > 1)
                 select (group.Key, group.Count())
@@ -531,7 +538,7 @@ module QueryTests =
     let ``Group students by age and sum ages.``() = 
         tag "Group students by age and sum ages."
         query {
-                for student in db.Student do
+                for student in db.Student.AsEnumerable() do
                 groupBy student.Age into g        
                 let total = query { for student in g do sumByNullable (Nullable student.Age) }
                 select (g.Key, g.Count(), total)
@@ -546,7 +553,7 @@ module QueryTests =
     let ``Group students by age and count number of students at each age, and display all with count > 1 in descending order of count.``() = 
         tag "Group students by age and count number of students at each age, and display all with count > 1 in descending order of count."
         query {
-                for student in db.Student do
+                for student in db.Student.AsEnumerable() do
                 groupBy student.Age into g
                 where (g.Count() > 1)        
                 sortByDescending (g.Count())
@@ -576,7 +583,7 @@ module QueryTests =
     let ``Look for students with Name match _e%% pattern and take first two.``() = 
         tag "Look for students with Name match _e%% pattern and take first two."
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
             where (SqlMethods.Like( student.Name, "_e%") )
             select student
             take 2   
@@ -588,7 +595,7 @@ module QueryTests =
     let ``Look for students with Name matching [abc]%% pattern.``() = 
         tag "Look for students with Name matching [abc]%% pattern."
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
             where (SqlMethods.Like( student.Name, "[abc]%") )
             select student  
             }
@@ -599,7 +606,7 @@ module QueryTests =
     let ``Look for students with name matching [^abc]%% pattern.``() = 
         tag "Look for students with name matching [^abc]%% pattern."
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
             where (SqlMethods.Like( student.Name, "[^abc]%") )
             select student  
             }
@@ -610,7 +617,7 @@ module QueryTests =
     let ``Look for students with name matching [^abc]%% pattern and select ID.``() = 
         tag "Look for students with name matching [^abc]%% pattern and select ID."
         query {
-            for n in db.Student do
+            for n in db.Student.AsEnumerable() do
             where (SqlMethods.Like( n.Name, "[^abc]%") )
             select n.StudentId    
             }
@@ -642,7 +649,7 @@ module QueryTests =
     let ``Join Student and CourseSelection tables.``() = 
         tag "Join Student and CourseSelection tables."
         query {
-                for student in db.Student do 
+                for student in db.Student.AsEnumerable() do 
                 join selection in db.CourseSelection 
                     on (student.StudentId = selection.StudentId)
                 select (student, selection)
@@ -654,7 +661,7 @@ module QueryTests =
     let ``Left Join Student and CourseSelection tables.``() = 
         tag "Left Join Student and CourseSelection tables."
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
             leftOuterJoin selection in db.CourseSelection 
                 on (student.StudentId = selection.StudentId) into result
             for selection in result.DefaultIfEmpty() do
@@ -672,7 +679,7 @@ module QueryTests =
     let ``Join with count``() = 
         tag "Join with count"
         query {
-                for n in db.Student do 
+                for n in db.Student.AsEnumerable() do 
                 join e in db.CourseSelection on (n.StudentId = e.StudentId)
                 count        
             }
@@ -683,7 +690,7 @@ module QueryTests =
     let ``Join with distinct.``() = 
         tag "Join with distinct."
         query {
-                for student in db.Student do 
+                for student in db.Student.AsEnumerable() do 
                 join selection in db.CourseSelection on (student.StudentId = selection.StudentId)
                 distinct        
             }
@@ -694,7 +701,7 @@ module QueryTests =
     let ``Join with distinct and count.``() = 
         tag "Join with distinct and count."
         query {
-                for n in db.Student do 
+                for n in db.Student.AsEnumerable() do 
                 join e in db.CourseSelection on (n.StudentId = e.StudentId)
                 distinct
                 count       
@@ -728,7 +735,7 @@ module QueryTests =
     let ``Selecting students in a certain age range and sorting.``() = 
         tag "Selecting students in a certain age range and sorting."
         query {
-                for n in db.Student do
+                for n in db.Student.AsEnumerable() do
                 where (n.Age = 12 || n.Age = 13)
                 sortByNullableDescending (Nullable n.Age)
                 select n
@@ -815,7 +822,7 @@ module QueryTests =
     let ``Multiple table select.``() = 
         tag "Multiple table select."
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
                 for course in db.Course do
                     select (student, course)
         }
@@ -828,7 +835,7 @@ module QueryTests =
     let ``Multiple Joins``() = 
         tag "Multiple Joins"
         query {
-            for student in db.Student do
+            for student in db.Student.AsEnumerable() do
             join courseSelection in db.CourseSelection on
                 (student.StudentId = courseSelection.StudentId)
             join course in db.Course on
@@ -842,14 +849,23 @@ module QueryTests =
     let ``Multiple Left Outer Joins``() = 
         tag "Multiple Left Outer Joins"
         query {
-            for student in db.Student do
-            leftOuterJoin courseSelection in db.CourseSelection 
+            for student in db.Student.AsEnumerable() do
+            leftOuterJoin courseSelection in db.CourseSelection
                 on (student.StudentId = courseSelection.StudentId) into g1
-            for courseSelection in g1.DefaultIfEmpty() do
-            leftOuterJoin course in db.Course 
+//            for courseSelection in g1.DefaultIfEmpty() do
+            for courseSelection in g1 do
+            leftOuterJoin course in db.Course
                 on (courseSelection.CourseId = course.CourseId) into g2
-            for course in g2.DefaultIfEmpty() do
+            for course in g2 do
                 select (student.Name, course.CourseName)
         }
         |> Seq.iter (fun (studentName, courseName) -> printfn "%s %s" studentName courseName)
 
+#if INTERACTIVE
+    query {
+        for student in db.Student do
+            averageBy (float32 student.StudentId)
+    }
+    |> printfn "Average student ID: %f"
+
+#endif

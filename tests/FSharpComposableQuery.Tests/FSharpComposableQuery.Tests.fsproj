@@ -119,14 +119,11 @@
     <Compile Include="QueryTests.fs" />
     <Compile Include="NorthwindTests.fs" />
     <Compile Include="ExtraTests.fs" />
-    <None Include="db.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="db.config.sample" />
     <None Include="README.md" />
     <Content Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="data\movies.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\FSharpComposableQuery\FSharpComposableQuery.fsproj">

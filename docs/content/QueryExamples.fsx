@@ -18,6 +18,7 @@ This file collects the sample queries from the Visual Studio documentation for F
 #r "System.Data.Linq.dll"
 #r "FSharp.PowerPack.Linq.dll"
 #r "FSharpComposableQuery.dll"
+#r "FSharp.Data.SqlProvider"
 
 open System
 open System.Data.Linq.SqlClient

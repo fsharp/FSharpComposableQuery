@@ -6,13 +6,15 @@ nuget NuGet.CommandLine
 nuget NUnit 2.6.3 framework: >= net40
 
 group build
-
     source https://api.nuget.org/v3/index.json
+    
     nuget FAKE
-nuget FSharp.Formatting
+    nuget FSharp.Formatting
+    nuget FSharpVSPowerTools.Core 2.3.0.0
+
 
 group test
-source https://www.nuget.org/api/v2
+    source https://www.nuget.org/api/v2
 
-nuget SQLprovider
-nuget System.Data.SQLite.Core
+    nuget SQLprovider
+    nuget System.Data.SQLite.Core

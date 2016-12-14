@@ -198,7 +198,8 @@ Target "All" DoNothing
     ==> "AssemblyInfo" 
     ==> "Build"
 
-"AssemblyInfo" 
+"AssemblyInfo"
+    ==> "Build"  
     ==> "SetupSQLite"
     ==> "BuildTest" 
     ==> "RunTests"
@@ -207,8 +208,7 @@ Target "All" DoNothing
     ==> "GenerateDocs" 
     ==> "ReleaseDocs"
 
-"Build" 
-    ==> "RunTests" 
+"Build"      
     ==> "GenerateDocs" 
     ==> "All"
 

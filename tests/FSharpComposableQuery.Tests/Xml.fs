@@ -30,7 +30,7 @@ module Xml =
             ,   ResolutionPath = resolutionPath
             ,   CaseSensitivityChange = Common.CaseSensitivityChange.ORIGINAL
             >
-    type internal Data = sql.dataContext.``main.DataEntity``
+    type internal DataEntity = sql.dataContext.``main.DataEntity``
 
     type internal Text = sql.dataContext.``main.DataEntity``
 
@@ -117,9 +117,9 @@ module Xml =
             let j = Seq.iter (traverseAttribute entry id) (xml.Attributes())
             let j = traverseChildren entry id (i + 1) (xml.Nodes())
 
-            let d = new Data()
+            let d = new DataEntity()
             d.Name <- xml.Name.ToString()
-            d.ID <- id
+            d.Id <- id
             d.Entry <- entry
             d.Pre <- i
             d.Post <- j
@@ -131,9 +131,9 @@ module Xml =
         | :? XText as xtext ->
             let id = new_id()
 
-            let d = new Data()
+            let d = new DataEntity()
             d.Name <- "#text"
-            d.ID <- id
+            d.Id <- id
             d.Entry <- entry
             d.Pre <- i
             d.Post <- i
@@ -141,7 +141,7 @@ module Xml =
             data.InsertOnSubmit(d)
 
             let t = new Text()
-            t.ID <- id
+            t.Id <- id
             t.Value <- xtext.Value
             text.InsertOnSubmit(t)
 
@@ -156,8 +156,8 @@ module Xml =
     let insertXml entry xml =
         let root_id = new_id()
         let j = traverseXml entry root_id 1 xml
-        let d = new Data()
-        d.ID <- root_id
+        let d = new DataEntity()
+        d.Id <- root_id
         d.Entry <- entry
         d.Pre <- 0
         d.Post <- j
@@ -196,14 +196,14 @@ module Xml =
     let internal axisPred axis =
         let rec axisPredRec axis =
             match axis with
-            | Self -> <@ fun (row1 : Data) (row2 : Data) -> row1.Id = row2.ID @>
-            | Child -> <@ fun (row1 : Data) (row2 : Data) -> row1.Id = row2.Parent @>
-            | Descendant -> <@ fun (row1 : Data) (row2 : Data) -> row1.Pre < row2.Pre && row2.Post < row1.Post @>
-            | DescendantOrSelf -> <@ fun (row1 : Data) (row2 : Data) -> row1.Pre <= row2.Pre && row2.Post <= row1.Post @>
-            | Following -> <@ fun (row1 : Data) (row2 : Data) -> row1.Post < row2.Pre @>
-            | FollowingSibling -> <@ fun (row1 : Data) (row2 : Data) -> row1.Post < row2.Pre && row1.Parent = row2.Parent @>
+            | Self -> <@ fun (row1 : DataEntity) (row2 : DataEntity) -> row1.Id = row2.ID @>
+            | Child -> <@ fun (row1 : DataEntity) (row2 : DataEntity) -> row1.Id = row2.Parent @>
+            | Descendant -> <@ fun (row1 : DataEntity) (row2 : DataEntity) -> row1.Pre < row2.Pre && row2.Post < row1.Post @>
+            | DescendantOrSelf -> <@ fun (row1 : DataEntity) (row2 : DataEntity) -> row1.Pre <= row2.Pre && row2.Post <= row1.Post @>
+            | Following -> <@ fun (row1 : DataEntity) (row2 : DataEntity) -> row1.Post < row2.Pre @>
+            | FollowingSibling -> <@ fun (row1 : DataEntity) (row2 : DataEntity) -> row1.Post < row2.Pre && row1.Parent = row2.Parent @>
             | Rev axis -> <@ fun row1 row2 -> (%axisPredRec axis) row2 row1 @>
-        <@ fun (row1 : Data) (row2 : Data) -> row1.Entry = row2.Entry && (%(axisPredRec axis)) row1 row2 @>
+        <@ fun (row1 : DataEntity) (row2 : DataEntity) -> row1.Entry = row2.Entry && (%(axisPredRec axis)) row1 row2 @>
 
     /// <summary>
     /// Returns an expression that will execute the given path query on the specified data source, when provided with a root node. 
@@ -219,11 +219,11 @@ module Xml =
                         for row2 in %data do
                             exists ((%(pathQ p1)) row1 row2 && (%(pathQ p2)) row2 row3)
                     } @>
-            | Axis ax -> <@ fun (row : Data) (row' : Data) -> ((%(axisPred ax)) row row') @>
-            | Name name -> <@ fun (row : Data) (row' : Data) -> row.Name = name && row.Id = row'.Id @>
+            | Axis ax -> <@ fun (row : DataEntity) (row' : DataEntity) -> ((%(axisPred ax)) row row') @>
+            | Name name -> <@ fun (row : DataEntity) (row' : DataEntity) -> row.Name = name && row.Id = row'.Id @>
             | Filter p ->
-                <@ fun (row : Data) (row' : Data) ->
-                    row.ID = row'.ID && query {
+                <@ fun (row : DataEntity) (row' : DataEntity) ->
+                    row.Id = row'.Id && query {
                                             for row'' in %data do
                                                 exists ((%(pathQ p)) row row'')
                                         } @>

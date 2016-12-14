@@ -34,7 +34,7 @@ module People =
     // Used in example 1
     type internal Result = { Name : string; Diff : int }
 
-//    let internal db = dbSchemaPeople.GetDataContext()
+    let internal db = sql.GetDataContext().Main
 
     // Used in example 6
     type internal Predicate =
@@ -46,8 +46,10 @@ module People =
 
     [<TestFixture>]
     type TestClass() =
-        static let couples = db.DataContext.GetTable<Couple>()
-        static let people = db.DataContext.GetTable<Person>()
+//        static let couples = db.DataContext.GetTable<Couple>()
+        static let couples = db.Couples
+//        static let people = db.DataContext.GetTable<Person>()
+        static let people = db.People
 
         // db table manipulation
 

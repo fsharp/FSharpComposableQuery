@@ -232,20 +232,22 @@ module Nested =
 
         let nestedDb =
             <@ query {
-                   for d in db.Departments do
-                       yield { dpt = d.Dpt
-                               employees =
-                                   query {
-                                       for e in db.Employees do
-                                           if d.Dpt = e.Dpt then
-                                               yield { emp = e.Emp
-                                                       tasks =
-                                                           query {
-                                                               for t in db.Tasks do
-                                                                   if t.Emp = e.Emp then yield t.Tsk
-                                                           } }
-                                   } }
-               } @>
+                for d in db.Departments do
+                    yield { 
+                        dpt = d.Dpt
+                        employees = query {
+                                for e in db.Employees do
+                                    if d.Dpt = e.Dpt then
+                                        yield { 
+                                            emp = e.Emp
+                                            tasks = query {
+                                                for t in db.Tasks do
+                                                    if t.Emp = e.Emp then yield t.Tsk
+                                            } 
+                                        }
+                        } 
+                    }
+            } @>
 
         let any() =
             <@ fun xs p ->

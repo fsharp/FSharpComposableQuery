@@ -187,6 +187,44 @@ Target "ReleaseDocs" (fun _ ->
     Branches.push tempDocsDir
 )
 
+#r "System.Data"
+open System.Data
+open System.Data.SqlClient
+open System.Text.RegularExpressions
+
+let batchRe = Regex("^GO", RegexOptions.Compiled ||| RegexOptions.IgnoreCase ||| RegexOptions.Multiline)
+
+Target "DbSetup" (fun _ ->
+   let connB = SqlConnectionStringBuilder("Integrated Security=True; Data Source=.\\SQLEXPRESS")
+   printfn "Data Source: [%s] - Press [Enter] to keep" (connB.DataSource)
+   let datasource = Console.ReadLine() |> fun x -> if x.Length = 0 then (connB.DataSource) else x
+   connB.DataSource <- datasource
+   let connStr = connB.ToString()
+   printfn "Using connection string: %s" connStr  
+   use conn = new SqlConnection(connStr)
+   conn.Open()
+   use messageHandler = conn.InfoMessage.Subscribe(fun m -> printfn "SQL Server: %s" m.Message)
+
+   let scriptsDir = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "tests/FSharpComposableQuery.Tests/sql")
+   for f in System.IO.Directory.EnumerateFiles(scriptsDir) do
+       printfn "Processing file: %s" f
+       let scriptTxt = ReadFileAsString f
+       let batches = batchRe.Split(scriptTxt) |> Array.filter(fun b -> b.Length > 0)
+       for batch in batches do
+           use cmd = conn.CreateCommand()
+           cmd.CommandText <- batch
+           try
+               use rdr = cmd.ExecuteReader()
+               ()
+           with
+           | :? SqlException as ex -> 
+               printfn "Error in SQL batch: \"%s\"" batch
+               reraise()
+           ()
+       printfn "\n"
+   printfn "Finished!"
+)
+
 Target "Release" DoNothing
 
 Target "All" DoNothing

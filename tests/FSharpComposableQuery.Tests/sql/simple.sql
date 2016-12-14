@@ -6,20 +6,18 @@ GO
 USE [master];
 GO
 
-:setvar DatabaseName "FCQ-Simple"
-
-IF EXISTS (SELECT * FROM sys.databases WHERE name = [$(DatabaseName)])
-                DROP DATABASE [$(DatabaseName)];
+IF EXISTS (SELECT * FROM sys.databases WHERE name = 'FCQ-Simple')
+                DROP DATABASE [FCQ-Simple];
 GO
 
-CREATE DATABASE [$(DatabaseName)] COLLATE SQL_Latin1_General_CP1_CI_AS;
+CREATE DATABASE [FCQ-Simple] COLLATE SQL_Latin1_General_CP1_CI_AS;
 GO
 
 -- Specify a simple recovery model to keep the log growth to a minimum.
-ALTER DATABASE [$(DatabaseName)] SET RECOVERY SIMPLE;
+ALTER DATABASE [FCQ-Simple] SET RECOVERY SIMPLE;
 GO
 
-USE [$(DatabaseName)];
+USE [FCQ-Simple];
 GO
 
 CREATE TABLE [dbo].[Course] (

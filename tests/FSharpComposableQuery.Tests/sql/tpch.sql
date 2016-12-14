@@ -1,26 +1,6 @@
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 
-USE [master];
-GO
-
-IF EXISTS (SELECT * FROM sys.databases WHERE name = 'FCQ-TPCH')
-                DROP DATABASE [FCQ-TPCH];
-GO
-
-CREATE DATABASE [FCQ-TPCH] COLLATE SQL_Latin1_General_CP1_CI_AS;
-GO
-
--- Specify a simple recovery model to keep the log growth to a minimum.
-ALTER DATABASE [FCQ-TPCH] SET RECOVERY SIMPLE;
-GO
-
-USE [FCQ-TPCH];
-GO
-
-CREATE TABLE [dbo].[customer](
+DROP TABLE IF EXISTS customer;
+CREATE TABLE [customer](
     [C_CustKey] [int] NOT NULL,
     [C_Name] [varchar](64) NOT NULL,
     [C_Address] [varchar](64) NOT NULL,
@@ -30,9 +10,10 @@ CREATE TABLE [dbo].[customer](
     [C_MktSegment] [varchar](64) NOT NULL,
     [C_Comment] [varchar](120) NOT NULL,
     [skip] [varchar](64) NOT NULL
-) ON [PRIMARY]
-GO
-CREATE TABLE [dbo].[lineitem](
+); 
+
+DROP TABLE IF EXISTS lineitem;
+CREATE TABLE [lineitem](
     [L_OrderKey] [int] NOT NULL,
     [L_PartKey] [int] NOT NULL,
     [L_SuppKey] [int] NOT NULL,
@@ -50,17 +31,19 @@ CREATE TABLE [dbo].[lineitem](
     [L_ShipMode] [varchar](64) NOT NULL,
     [L_Comment] [varchar](64) NOT NULL,
     [skip] [varchar](64) NOT NULL
-) ON [PRIMARY]
-GO
-CREATE TABLE [dbo].[nation](
+); 
+
+DROP TABLE IF EXISTS nation;
+CREATE TABLE [nation](
     [N_NationKey] [int] NOT NULL,
     [N_Name] [varchar](64) NOT NULL,
     [N_RegionKey] [int] NOT NULL,
     [N_Comment] [varchar](160) NOT NULL,
     [skip] [varchar](64) NOT NULL
-) ON [PRIMARY]
-GO
-CREATE TABLE [dbo].[orders](
+); 
+
+DROP TABLE IF EXISTS orders;
+CREATE TABLE [orders](
     [O_OrderKey] [int] NOT NULL,
     [O_CustKey] [int] NOT NULL,
     [O_OrderStatus] [varchar](64) NOT NULL,
@@ -71,9 +54,10 @@ CREATE TABLE [dbo].[orders](
     [O_ShipPriority] [int] NOT NULL,
     [O_Comment] [varchar](80) NOT NULL,
     [skip] [varchar](64) NOT NULL
-) ON [PRIMARY]
-GO
-CREATE TABLE [dbo].[part](
+); 
+
+DROP TABLE IF EXISTS part;
+CREATE TABLE [part](
     [P_PartKey] [int] NOT NULL,
     [P_Name] [varchar](64) NOT NULL,
     [P_Mfgr] [varchar](64) NOT NULL,
@@ -84,25 +68,28 @@ CREATE TABLE [dbo].[part](
     [P_RetailPrice] [decimal](13, 2) NOT NULL,
     [P_Comment] [varchar](64) NOT NULL,
     [skip] [varchar](64) NOT NULL
-) ON [PRIMARY]
-GO
-CREATE TABLE [dbo].[partsupp](
+); 
+
+DROP TABLE IF EXISTS partsupp;
+CREATE TABLE [partsupp](
     [PS_PartKey] [int] NOT NULL,
     [PS_SuppKey] [int] NOT NULL,
     [PS_AvailQty] [int] NOT NULL,
     [PS_SupplyCost] [decimal](13, 2) NOT NULL,
     [PS_Comment] [varchar](200) NOT NULL,
     [skip] [varchar](64) NOT NULL
-) ON [PRIMARY]
-GO
-CREATE TABLE [dbo].[region](
+); 
+
+DROP TABLE IF EXISTS region;
+CREATE TABLE [region](
     [R_RegionKey] [int] NOT NULL,
     [R_Name] [varchar](64) NOT NULL,
     [R_Comment] [varchar](160) NOT NULL,
     [skip] [varchar](64) NOT NULL
-) ON [PRIMARY]
-GO
-CREATE TABLE [dbo].[supplier](
+); 
+
+DROP TABLE IF EXISTS supplier;
+CREATE TABLE [supplier](
     [S_SuppKey] [int] NOT NULL,
     [S_Name] [varchar](64) NOT NULL,
     [S_Address] [varchar](64) NOT NULL,
@@ -111,5 +98,4 @@ CREATE TABLE [dbo].[supplier](
     [S_AcctBal] [decimal](13, 2) NOT NULL,
     [S_Comment] [varchar](105) NOT NULL,
     [skip] [varchar](64) NOT NULL
-) ON [PRIMARY]
-GO
+); 

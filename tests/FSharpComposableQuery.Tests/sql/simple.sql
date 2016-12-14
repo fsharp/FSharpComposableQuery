@@ -1,52 +1,34 @@
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-USE [master];
-GO
-
-IF EXISTS (SELECT * FROM sys.databases WHERE name = 'FCQ-Simple')
-                DROP DATABASE [FCQ-Simple];
-GO
-
-CREATE DATABASE [FCQ-Simple] COLLATE SQL_Latin1_General_CP1_CI_AS;
-GO
-
--- Specify a simple recovery model to keep the log growth to a minimum.
-ALTER DATABASE [FCQ-Simple] SET RECOVERY SIMPLE;
-GO
-
-USE [FCQ-Simple];
-GO
-
-CREATE TABLE [dbo].[Course] (
+DROP TABLE IF EXISTS Course;
+CREATE TABLE [Course] (
     [CourseID]   INT           NOT NULL,
     [CourseName] NVARCHAR (255) NOT NULL,
-    PRIMARY KEY CLUSTERED ([CourseID] ASC)
+    PRIMARY KEY ([CourseID] ASC)
 );
 
-CREATE TABLE [dbo].[Student] (
+DROP TABLE IF EXISTS Student;
+CREATE TABLE [Student] (
     [StudentID] INT           NOT NULL,
     [Name]      NVARCHAR (255) NOT NULL,
     [Age]       INT           NULL,
-    PRIMARY KEY CLUSTERED ([StudentID] ASC)
+    PRIMARY KEY ([StudentID] ASC)
 );
 
-CREATE TABLE [dbo].[CourseSelection] (
+DROP TABLE IF EXISTS CourseSelection;
+CREATE TABLE [CourseSelection] (
     [ID]        INT NOT NULL,
     [StudentID] INT NOT NULL,
     [CourseID]  INT NOT NULL,
-    PRIMARY KEY CLUSTERED ([ID] ASC),
-    CONSTRAINT [FK_CourseSelection_ToTable] FOREIGN KEY ([StudentID]) REFERENCES [dbo].[Student] ([StudentID]) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT [FK_CourseSelection_Course_1] FOREIGN KEY ([CourseID]) REFERENCES [dbo].[Course] ([CourseID]) ON DELETE NO ACTION ON UPDATE NO ACTION
+    PRIMARY KEY ([ID] ASC),
+    CONSTRAINT [FK_CourseSelection_ToTable] FOREIGN KEY ([StudentID]) REFERENCES [Student] ([StudentID]) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT [FK_CourseSelection_Course_1] FOREIGN KEY ([CourseID]) REFERENCES [Course] ([CourseID]) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
-CREATE TABLE [dbo].[LastStudent] (
+DROP TABLE IF EXISTS LastStudent;
+CREATE TABLE [LastStudent] (
     [StudentID] INT           NOT NULL,
     [Name]      NVARCHAR (255) NOT NULL,
     [Age]       INT           NULL,
-    PRIMARY KEY CLUSTERED ([StudentID] ASC)
+    PRIMARY KEY ([StudentID] ASC)
 );
 
 -- Insert data into the tables.

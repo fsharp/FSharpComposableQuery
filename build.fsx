@@ -190,23 +190,18 @@ Target "ReleaseDocs" (fun _ ->
 #r "System.Data"
 open System.Data
 open System.Data.SqlClient
+#r @"packages/test/System.Data.SQLite.Core/lib/net451/System.Data.SQLite.dll"
+open System.Data.SQLite
 open System.Text.RegularExpressions
 
 let batchRe = Regex("^GO", RegexOptions.Compiled ||| RegexOptions.IgnoreCase ||| RegexOptions.Multiline)
 
 Target "DbSetup" (fun _ ->
-   let connB = SqlConnectionStringBuilder("Integrated Security=True; Data Source=.\\SQLEXPRESS")
-   printfn "Data Source: [%s] - Press [Enter] to keep" (connB.DataSource)
-   let datasource = Console.ReadLine() |> fun x -> if x.Length = 0 then (connB.DataSource) else x
-   connB.DataSource <- datasource
-   let connStr = connB.ToString()
-   printfn "Using connection string: %s" connStr  
-   use conn = new SqlConnection(connStr)
-   conn.Open()
-   use messageHandler = conn.InfoMessage.Subscribe(fun m -> printfn "SQL Server: %s" m.Message)
-
    let scriptsDir = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "tests/FSharpComposableQuery.Tests/sql")
    for f in System.IO.Directory.EnumerateFiles(scriptsDir) do
+       let dbname = System.IO.Path.GetFileNameWithoutExtension(f)
+       use conn = new SQLiteConnection(sprintf "DataSource=%s.db" dbname)
+       conn.Open()
        printfn "Processing file: %s" f
        let scriptTxt = ReadFileAsString f
        let batches = batchRe.Split(scriptTxt) |> Array.filter(fun b -> b.Length > 0)

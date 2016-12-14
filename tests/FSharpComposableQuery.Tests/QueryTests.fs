@@ -49,7 +49,7 @@ module QueryTests =
             let result1 =
                 query {
                     for student in db.Student do
-                    select student.Age.Value
+                    select student.Age
                     contains 11
                     }
             result1 |> printfn "Is at least one student age 11? %b" 
@@ -98,11 +98,11 @@ module QueryTests =
             let student2 =
                 query {
                     for student in db.Student do
-                    where (student.StudentID = 1)
+                    where (student.StudentId = 1)
                     select student
                     exactlyOne
                     }
-            printfn "Student with StudentID = 1 is %s" student2.Name
+            printfn "Student with StudentId = 1 is %s" student2.Name
 
 
         [<Test>]
@@ -111,11 +111,11 @@ module QueryTests =
             let student3 =
                 query {
                     for student in db.Student do
-                    where (student.StudentID = 1)
+                    where (student.StudentId = 1)
                     select student
                     exactlyOneOrDefault
                     }
-            printfn "Student with StudentID = 1 is %s" student3.Name
+            printfn "Student with StudentId = 1 is %s" student3.Name
 
 
         [<Test>]
@@ -138,7 +138,7 @@ module QueryTests =
                     for (student) in db.Student do
                     select student
                     }
-            select5 |> Seq.iter (fun (student) -> printfn "StudentID, Name: %d %s" student.StudentID student.Name)
+            select5 |> Seq.iter (fun (student) -> printfn "StudentId, Name: %d %s" student.StudentId student.Name)
 
 
         [<Test>]
@@ -147,10 +147,10 @@ module QueryTests =
             let select6 = 
                 query {
                     for student in db.Student do
-                    where (student.StudentID > 4)
+                    where (student.StudentId > 4)
                     select student
                     }
-            select6 |> Seq.iter (fun student -> printfn "StudentID, Name: %d %s" student.StudentID student.Name)
+            select6 |> Seq.iter (fun student -> printfn "StudentId, Name: %d %s" student.StudentId student.Name)
             ignore 0
 
         [<Test>]
@@ -159,7 +159,7 @@ module QueryTests =
             let student5 =
                 query {
                     for student in db.Student do
-                    minBy student.StudentID
+                    minBy student.StudentId
                 }
             ignore 0
 
@@ -170,7 +170,7 @@ module QueryTests =
             let student6 =
                 query {
                     for student in db.Student do
-                    maxBy student.StudentID
+                    maxBy student.StudentId
                 }
             ignore 0
 
@@ -184,7 +184,7 @@ module QueryTests =
                 groupBy student.Age into g
                 select (g.Key, g.Count())
                 }
-            |> Seq.iter (fun (age, count) -> printfn "Age: %s Count at that age: %d" (printNullable age) count)
+            |> Seq.iter (fun (age, count) -> printfn "Age: %i Count at that age: %d"  age count)
 
 
         [<Test>]
@@ -195,7 +195,7 @@ module QueryTests =
                 sortBy student.Name
                 select student
             }
-            |> Seq.iter (fun student -> printfn "StudentID, Name: %d %s" student.StudentID student.Name)
+            |> Seq.iter (fun student -> printfn "StudentId, Name: %d %s" student.StudentId student.Name)
 
 
         [<Test>]
@@ -206,7 +206,7 @@ module QueryTests =
                 sortByDescending student.Name
                 select student
             }
-            |> Seq.iter (fun student -> printfn "StudentID, Name: %d %s" student.StudentID student.Name)
+            |> Seq.iter (fun student -> printfn "StudentId, Name: %d %s" student.StudentId student.Name)
 
 
         [<Test>]
@@ -214,12 +214,12 @@ module QueryTests =
             tag "thenBy query operator."
             query {
                 for student in db.Student do
-                where student.Age.HasValue
-                sortBy student.Age.Value
+                where (student.Age >= 0)
+                sortBy student.Age
                 thenBy student.Name
                 select student
             }
-            |> Seq.iter (fun student -> printfn "StudentID, Name: %d %s" student.Age.Value student.Name)
+            |> Seq.iter (fun student -> printfn "StudentId, Name: %d %s" student.Age student.Name)
 
 
         [<Test>]
@@ -227,12 +227,12 @@ module QueryTests =
             tag "thenByDescending query operator."
             query {
                 for student in db.Student do
-                where student.Age.HasValue
-                sortBy student.Age.Value
+                where (student.Age >= 0)
+                sortBy student.Age
                 thenByDescending student.Name
                 select student
             }
-            |> Seq.iter (fun student -> printfn "StudentID, Name: %d %s" student.Age.Value student.Name)
+            |> Seq.iter (fun student -> printfn "StudentId, Name: %d %s" student.Age student.Name)
 
 
         [<Test>]
@@ -244,7 +244,7 @@ module QueryTests =
                 select (g, g.Key, g.Count())
                 }
             |> Seq.iter (fun (group, age, count) ->
-                printfn "Age: %s Count at that age: %d" (printNullable age) count
+                printfn "Age: %i Count at that age: %i" age count
                 group |> Seq.iter (fun name -> printfn "Name: %s" name))
 
 
@@ -253,9 +253,9 @@ module QueryTests =
             tag "sumByNullable query operator"
             query {
                 for student in db.Student do
-                sumByNullable student.Age
+                sumBy student.Age
                 }
-            |> (fun sum -> printfn "Sum of ages: %s" (printNullable sum))
+            |> (fun sum -> printfn "Sum of ages: %i" sum)
 
 
         [<Test>]
@@ -263,9 +263,9 @@ module QueryTests =
             tag "minByNullable"
             query {
                 for student in db.Student do
-                minByNullable student.Age
+                minBy student.Age
                 }
-            |> (fun age -> printfn "Minimum age: %s" (printNullable age))
+            |> (fun age -> printfn "Minimum age: %i" age)
 
 
         [<Test>]
@@ -273,7 +273,7 @@ module QueryTests =
             tag "maxByNullable"
             query {
                 for student in db.Student do
-                maxByNullable student.Age
+                maxByNullable (Nullable student.Age)
                 }
             |> (fun age -> printfn "Maximum age: %s" (printNullable age))
 
@@ -283,7 +283,7 @@ module QueryTests =
             tag "averageBy"
             query {
                 for student in db.Student do
-                averageBy (float student.StudentID)
+                averageBy (float student.StudentId)
                 }
             |> printfn "Average student ID: %f"
 
@@ -293,7 +293,7 @@ module QueryTests =
             tag "averageByNullable"
             query {
                 for student in db.Student do
-                averageByNullable (Nullable.float student.Age)
+                averageByNullable (Nullable (float student.Age))
                 }
             |> (fun avg -> printfn "Average age: %s" (printNullable avg))
 
@@ -305,7 +305,7 @@ module QueryTests =
                 for student in db.Student do
                 find (student.Name = "Abercrombie, Kim")
             }
-            |> (fun student -> printfn "Found a match with StudentID = %d" student.StudentID)
+            |> (fun student -> printfn "Found a match with StudentId = %d" student.StudentId)
 
 
         [<Test>]
@@ -325,7 +325,7 @@ module QueryTests =
                 for student in db.Student do
                 head
                 }
-            |> (fun student -> printfn "Found the head student with StudentID = %d" student.StudentID)
+            |> (fun student -> printfn "Found the head student with StudentId = %d" student.StudentId)
 
 
         [<Test>]
@@ -345,7 +345,7 @@ module QueryTests =
                 for student in db.Student do
                 skip 1
                 }
-            |> Seq.iter (fun student -> printfn "StudentID = %d" student.StudentID)
+            |> Seq.iter (fun student -> printfn "StudentId = %d" student.StudentId)
 
 
         [<Test>]
@@ -364,7 +364,7 @@ module QueryTests =
             tag "sumBy query operator"
             query {
                for student in db.Student do
-               sumBy student.StudentID
+               sumBy student.StudentId
                }
             |> printfn "Sum of student IDs: %d" 
 
@@ -377,7 +377,7 @@ module QueryTests =
                select student
                take 2
                }
-            |> Seq.iter (fun student -> printfn "StudentID = %d" student.StudentID)
+            |> Seq.iter (fun student -> printfn "StudentId = %d" student.StudentId)
 
 
         [<Test>]
@@ -395,11 +395,11 @@ module QueryTests =
             tag "sortByNullable query operator"
             query {
                 for student in db.Student do
-                sortByNullable student.Age
+                sortByNullable (Nullable student.Age)
                 select student
             }
             |> Seq.iter (fun student ->
-                printfn "StudentID, Name, Age: %d %s %s" student.StudentID student.Name (printNullable student.Age))
+                printfn "StudentId, Name, Age: %d %s %i" student.StudentId student.Name student.Age)
 
 
         [<Test>]
@@ -407,11 +407,11 @@ module QueryTests =
             tag "sortByNullableDescending query operator"
             query {
                 for student in db.Student do
-                sortByNullableDescending student.Age
+                sortByNullableDescending (Nullable student.Age)
                 select student
             }
             |> Seq.iter (fun student ->
-                printfn "StudentID, Name, Age: %d %s %s" student.StudentID student.Name (printNullable student.Age))
+                printfn "StudentId, Name, Age: %d %s %i" student.StudentId student.Name student.Age)
 
 
         [<Test>]
@@ -420,11 +420,11 @@ module QueryTests =
             query {
                 for student in db.Student do
                 sortBy student.Name
-                thenByNullable student.Age
+                thenByNullable (Nullable student.Age)
                 select student
             }
             |> Seq.iter (fun student ->
-                printfn "StudentID, Name, Age: %d %s %s" student.StudentID student.Name (printNullable student.Age))
+                printfn "StudentId, Name, Age: %d %s %i" student.StudentId student.Name student.Age)
 
 
         [<Test>]
@@ -433,11 +433,11 @@ module QueryTests =
             query {
                 for student in db.Student do
                 sortBy student.Name
-                thenByNullableDescending student.Age
+                thenByNullableDescending (Nullable student.Age)
                 select student
             }
             |> Seq.iter (fun student ->
-                printfn "StudentID, Name, Age: %d %s %s" student.StudentID student.Name (printNullable student.Age))
+                printfn "StudentId, Name, Age: %d %s %s" student.StudentId student.Name (printNullable <| Nullable student.Age))
 
 
         [<Test>]
@@ -447,7 +447,7 @@ module QueryTests =
                     for student in db.Student do
                     select student
                 }
-                |> Seq.iter (fun student -> printfn "%s %d %s" student.Name student.StudentID (printNullable student.Age))
+                |> Seq.iter (fun student -> printfn "%s %d %s" student.Name student.StudentId (printNullable <| Nullable student.Age))
 
 
         [<Test>]
@@ -470,7 +470,7 @@ module QueryTests =
                     for student in db.Student do
                     where (ExtraTopLevelOperators.query 
                                   { for courseSelection in db.CourseSelection do
-                                    exists (courseSelection.StudentID = student.StudentID) })
+                                    exists (courseSelection.StudentId = student.StudentId) })
                     select student }
             |> Seq.iter (fun student -> printfn "%A" student.Name)
     
@@ -483,7 +483,7 @@ module QueryTests =
                     for student in db.Student do
                     where (query 
                                   { for courseSelection in db.CourseSelection do
-                                    exists (courseSelection.StudentID = student.StudentID) })
+                                    exists (courseSelection.StudentId = student.StudentId) })
                     select student }
             |> Seq.iter (fun student -> printfn "%A" student.Name)
 
@@ -495,7 +495,7 @@ module QueryTests =
                     groupBy n.Age into g
                     select (g.Key, g.Count())
             }
-            |> Seq.iter (fun (age, count) -> printfn "%s %d" (printNullable age) count)
+            |> Seq.iter (fun (age, count) -> printfn "%s %d" (printNullable <| Nullable age) count)
 
 
         [<Test>]
@@ -506,7 +506,7 @@ module QueryTests =
                     groupValBy n.Age n.Age into g
                     select (g.Key, g.Count())
                 }
-            |> Seq.iter (fun (age, count) -> printfn "%s %d" (printNullable age) count)
+            |> Seq.iter (fun (age, count) -> printfn "%s %d" (printNullable <| Nullable age) count)
 
 
     
@@ -519,11 +519,11 @@ module QueryTests =
             query {
                     for student in db.Student do
                     groupBy student.Age into g
-                    where (g.Key.HasValue && g.Key.Value > 10)
+                    where ( g.Key > 10)
                     select (g, g.Key)
             }
             |> Seq.iter (fun (students, age) ->
-                printfn "Age: %s" (age.Value.ToString())
+                printfn "Age: %s" (age.ToString())
                 students
                 |> Seq.iter (fun student -> printfn "%s" student.Name))
 
@@ -537,7 +537,7 @@ module QueryTests =
                     select (group.Key, group.Count())
             }
             |> Seq.iter (fun (age, ageCount) ->
-                 printfn "Age: %s Count: %d" (printNullable age) ageCount)
+                 printfn "Age: %s Count: %d" (printNullable <| Nullable age) ageCount)
 
 
         [<Test>]
@@ -546,11 +546,11 @@ module QueryTests =
             query {
                     for student in db.Student do
                     groupBy student.Age into g        
-                    let total = query { for student in g do sumByNullable student.Age }
+                    let total = query { for student in g do sumByNullable (Nullable student.Age) }
                     select (g.Key, g.Count(), total)
             }
             |> Seq.iter (fun (age, count, total) ->
-                printfn "Age: %d" (age.GetValueOrDefault())
+                printfn "Age: %d" (age)
                 printfn "Count: %d" count
                 printfn "Total years: %s" (total.ToString()))
 
@@ -566,7 +566,7 @@ module QueryTests =
                     select (g.Key, g.Count())
             }
             |> Seq.iter (fun (age, myCount) ->
-                printfn "Age: %s" (printNullable age)
+                printfn "Age: %i" age
                 printfn "Count: %d" myCount)
 
 
@@ -578,7 +578,7 @@ module QueryTests =
                                    select id }
             query {
                     for student in db.Student do
-                    where (idQuery.Contains(student.StudentID))
+                    where (idQuery.Contains(student.StudentId))
                     select student
                     }
             |> Seq.iter (fun student ->
@@ -625,7 +625,7 @@ module QueryTests =
             query {
                 for n in db.Student do
                 where (SqlMethods.Like( n.Name, "[^abc]%") )
-                select n.StudentID    
+                select n.StudentId    
                 }
             |> Seq.iter (fun id -> printfn "%d" id)
 
@@ -657,10 +657,10 @@ module QueryTests =
             query {
                     for student in db.Student do 
                     join selection in db.CourseSelection 
-                      on (student.StudentID = selection.StudentID)
+                      on (student.StudentId = selection.StudentId)
                     select (student, selection)
                 }
-            |> Seq.iter (fun (student, selection) -> printfn "%d %s %d" student.StudentID student.Name selection.CourseID)
+            |> Seq.iter (fun (student, selection) -> printfn "%d %s %d" student.StudentId student.Name selection.CourseId)
 
 
         [<Test>]
@@ -669,7 +669,7 @@ module QueryTests =
             query {
                 for student in db.Student do
                 leftOuterJoin selection in db.CourseSelection 
-                  on (student.StudentID = selection.StudentID) into result
+                  on (student.StudentId = selection.StudentId) into result
                 for selection in result.DefaultIfEmpty() do
                 select (student, selection)
                 }
@@ -677,8 +677,8 @@ module QueryTests =
                 let selectionID, studentID, courseID =
                     match selection with
                     | null -> "NULL", "NULL", "NULL"
-                    | sel -> (sel.ID.ToString(), sel.StudentID.ToString(), sel.CourseID.ToString())
-                printfn "%d %s %d %s %s %s" student.StudentID student.Name (student.Age.GetValueOrDefault()) selectionID studentID courseID)
+                    | sel -> (sel.Id.ToString(), sel.StudentId.ToString(), sel.CourseId.ToString())
+                printfn "%d %s %d %s %s %s" student.StudentId student.Name (student.Age) selectionID studentID courseID)
 
 
         [<Test>]
@@ -686,7 +686,7 @@ module QueryTests =
             tag "Join with count"
             query {
                     for n in db.Student do 
-                    join e in db.CourseSelection on (n.StudentID = e.StudentID)
+                    join e in db.CourseSelection on (n.StudentId = e.StudentId)
                     count        
                 }
             |>  printfn "%d"
@@ -697,10 +697,10 @@ module QueryTests =
             tag "Join with distinct."
             query {
                     for student in db.Student do 
-                    join selection in db.CourseSelection on (student.StudentID = selection.StudentID)
+                    join selection in db.CourseSelection on (student.StudentId = selection.StudentId)
                     distinct        
                 }
-            |> Seq.iter (fun (student, selection) -> printfn "%s %d" student.Name selection.CourseID)
+            |> Seq.iter (fun (student, selection) -> printfn "%s %d" student.Name selection.CourseId)
 
 
         [<Test>]
@@ -708,7 +708,7 @@ module QueryTests =
             tag "Join with distinct and count."
             query {
                     for n in db.Student do 
-                    join e in db.CourseSelection on (n.StudentID = e.StudentID)
+                    join e in db.CourseSelection on (n.StudentId = e.StudentId)
                     distinct
                     count       
                 }
@@ -720,7 +720,7 @@ module QueryTests =
             tag "Selecting students with age between 10 and 15."
             query {
                     for student in db.Student do
-                    where (student.Age.Value >= 10 && student.Age.Value < 15)
+                    where (student.Age >= 10 && student.Age < 15)
                     select student
                 }
             |> Seq.iter (fun student -> printfn "%s" student.Name)
@@ -731,7 +731,7 @@ module QueryTests =
             tag "Selecting students with age either 11 or 12."
             query {
                     for student in db.Student do
-                    where (student.Age.Value = 11 || student.Age.Value = 12)
+                    where (student.Age = 11 || student.Age = 12)
                     select student
                 }
             |> Seq.iter (fun student -> printfn "%s" student.Name)
@@ -742,11 +742,11 @@ module QueryTests =
             tag "Selecting students in a certain age range and sorting."
             query {
                     for n in db.Student do
-                    where (n.Age.Value = 12 || n.Age.Value = 13)
-                    sortByNullableDescending n.Age
+                    where (n.Age = 12 || n.Age = 13)
+                    sortByNullableDescending (Nullable n.Age)
                     select n
                 }
-            |> Seq.iter (fun student -> printfn "%s %s" student.Name (printNullable student.Age))
+            |> Seq.iter (fun student -> printfn "%s %s" student.Name (printNullable <| Nullable student.Age))
 
 
         [<Test>]
@@ -754,8 +754,7 @@ module QueryTests =
             tag "Selecting students with certain ages, taking account of possibility of nulls."
             query {
                     for student in db.Student do
-                    where ((student.Age.HasValue && student.Age.Value = 11) ||
-                           (student.Age.HasValue && student.Age.Value = 12))
+                    where ((student.Age = 11) || (student.Age = 12))
                     sortByDescending student.Name 
                     select student.Name
                     take 2
@@ -778,7 +777,7 @@ module QueryTests =
                     }
 
             query2.Union (query1)
-            |> Seq.iter (fun (name, age) -> printfn "%s %s" name (printNullable age))
+            |> Seq.iter (fun (name, age) -> printfn "%s %s" name (printNullable<|Nullable age))
 
 
         [<Test>]
@@ -795,7 +794,7 @@ module QueryTests =
                     }
 
             query1.Intersect(query2)
-            |> Seq.iter (fun (name, age) -> printfn "%s %s" name (printNullable age))
+            |> Seq.iter (fun (name, age) -> printfn "%s %s" name (printNullable<| Nullable age))
 
 
         [<Test>]
@@ -803,11 +802,11 @@ module QueryTests =
             tag "Using if statement to alter results for special value."
             query {
                     for student in db.Student do
-                    select (if student.Age.HasValue && student.Age.Value = -1 then
-                               (student.StudentID, System.Nullable<int>(100), student.Age)
-                            else (student.StudentID, student.Age, student.Age))
+                    select (if student.Age = -1 then
+                               (student.StudentId, 100, student.Age)
+                            else (student.StudentId, student.Age, student.Age))
                 }
-            |> Seq.iter (fun (id, value, age) -> printfn "%d %s %s" id (printNullable value) (printNullable age))
+            |> Seq.iter (fun (id, value, age) -> printfn "%d %i %i" id value age)
 
 
         [<Test>]
@@ -815,13 +814,13 @@ module QueryTests =
             tag "Using if statement to alter results special values."
             query {
                     for student in db.Student do
-                    select (if student.Age.HasValue && student.Age.Value = -1 then
-                               (student.StudentID, System.Nullable<int>(100), student.Age)
-                            elif student.Age.HasValue && student.Age.Value = 0 then
-                                (student.StudentID, System.Nullable<int>(100), student.Age)
-                            else (student.StudentID, student.Age, student.Age))
+                    select (if  student.Age = -1 then
+                               (student.StudentId,100, student.Age)
+                            elif student.Age = 0 then
+                                (student.StudentId, 100, student.Age)
+                            else (student.StudentId, student.Age, student.Age))
                 }
-            |> Seq.iter (fun (id, value, age) -> printfn "%d %s %s" id (printNullable value) (printNullable age))
+            |> Seq.iter (fun (id, value, age) -> printfn "%d %i %i" id  value age)
 
 
 
@@ -834,8 +833,8 @@ module QueryTests =
                     select (student, course)
             }
             |> Seq.iteri (fun index (student, course) ->
-                if (index = 0) then printfn "StudentID Name Age CourseID CourseName"
-                printfn "%d %s %s %d %s" student.StudentID student.Name (printNullable student.Age) course.CourseID course.CourseName)
+                if (index = 0) then printfn "StudentId Name Age CourseId CourseName"
+                printfn "%d %s %i %d %s" student.StudentId student.Name student.Age course.CourseId course.CourseName)
 
 
         [<Test>]
@@ -844,9 +843,9 @@ module QueryTests =
             query {
                 for student in db.Student do
                 join courseSelection in db.CourseSelection on
-                    (student.StudentID = courseSelection.StudentID)
+                    (student.StudentId = courseSelection.StudentId)
                 join course in db.Course on
-                      (courseSelection.CourseID = course.CourseID)
+                      (courseSelection.CourseId = course.CourseId)
                 select (student.Name, course.CourseName)
                 }
                 |> Seq.iter (fun (studentName, courseName) -> printfn "%s %s" studentName courseName)
@@ -858,10 +857,10 @@ module QueryTests =
             query {
                for student in db.Student do
                 leftOuterJoin courseSelection in db.CourseSelection 
-                  on (student.StudentID = courseSelection.StudentID) into g1
+                  on (student.StudentId = courseSelection.StudentId) into g1
                 for courseSelection in g1.DefaultIfEmpty() do
                 leftOuterJoin course in db.Course 
-                  on (courseSelection.CourseID = course.CourseID) into g2
+                  on (courseSelection.CourseId = course.CourseId) into g2
                 for course in g2.DefaultIfEmpty() do
                 select (student.Name, course.CourseName)
                 }

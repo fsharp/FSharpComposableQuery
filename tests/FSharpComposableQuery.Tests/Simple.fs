@@ -18,10 +18,6 @@ open FSharpComposableQuery
 /// <para>The original queries can be found at http://msdn.microsoft.com/en-us/library/vstudio/hh225374.aspx </para>
 /// </summary>
 module Simple = 
-    [<Literal>]
-    let dbConfigPath = "db.config"
-    
-//    type internal schema = SqlDataConnection<ConnectionStringName="QueryConnectionString", ConfigFile=dbConfigPath>
 
     let [<Literal>] connectionString = "DataSource=" + __SOURCE_DIRECTORY__ + @"/../databases/simple.db;" + "Version=3;foreign keys = true"
     let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net46"
@@ -770,7 +766,7 @@ module Simple =
             let q = <@ query {
                     for n in db.Student do
                     where (n.Age = 12 || n.Age = 13)
-                    sortByNullableDescending (Nullable n.Age)
+                    sortByDescending  n.Age
                     select n
                 } @>
             Utils.Run q

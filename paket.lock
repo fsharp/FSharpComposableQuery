@@ -1,6 +1,4 @@
-NUGET
-  remote: http://api.nuget.org/v3/index.json
-    NUnit (2.6.3) - framework: >= net40
+
 
 GROUP build
 NUGET
@@ -16,5 +14,19 @@ NUGET
 GROUP test
 NUGET
   remote: https://www.nuget.org/api/v2
+    NUnit (3.5)
+    NUnit.ConsoleRunner (3.5)
+    NUnit.Extension.NUnitProjectLoader (3.5)
+    NUnit.Extension.NUnitV2Driver (3.5)
+    NUnit.Extension.NUnitV2ResultWriter (3.5)
+    NUnit.Extension.TeamCityEventListener (1.0.2)
+    NUnit.Extension.VSProjectLoader (3.5)
+    NUnit.Runners (3.5)
+      NUnit.ConsoleRunner (>= 3.5)
+      NUnit.Extension.NUnitProjectLoader (>= 3.5)
+      NUnit.Extension.NUnitV2Driver (>= 3.5)
+      NUnit.Extension.NUnitV2ResultWriter (>= 3.5)
+      NUnit.Extension.TeamCityEventListener (>= 1.0.2)
+      NUnit.Extension.VSProjectLoader (>= 3.5)
     SQLProvider (1.0.37)
     System.Data.SQLite.Core (1.0.103)

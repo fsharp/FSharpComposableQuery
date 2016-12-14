@@ -3,7 +3,7 @@ source https://dotnet.myget.org/F/cli-deps/api/v3/index.json
 source https://api.nuget.org/v3/index.json
 
 
-nuget NUnit 2.6.3 framework: >= net40
+
 
 group build
     source https://api.nuget.org/v3/index.json
@@ -16,5 +16,7 @@ group build
 group test
     source https://www.nuget.org/api/v2
 
+    nuget Nunit 
+    nuget NUnit.Runners
     nuget SQLprovider
     nuget System.Data.SQLite.Core

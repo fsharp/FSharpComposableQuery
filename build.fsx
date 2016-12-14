@@ -50,7 +50,7 @@ let testBuildDir = "./bin/tests"
 
 
 // Pattern specifying assemblies to be tested using MSTest
-let testAssemblies = !! "bin/FSharpComposableQuery*Tests*.exe"
+let testAssemblies = !! "bin/tests/FSharpComposableQuery*Tests*.exe"
 
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted 
@@ -83,7 +83,12 @@ Target "AssemblyInfo" (fun _ ->
 
 
 Target "Clean" (fun _ ->
-    CleanDirs [buildDir; testBuildDir; "temp"]
+    CleanDirs [
+        buildDir 
+        testBuildDir 
+        "temp" 
+        "tests/databases"
+    ]
 )
 
 Target "CleanDocs" (fun _ ->
@@ -110,24 +115,24 @@ Target "BuildTest" (fun _ ->
 
 // --------------------------------------------------------------------------------------
 // Run unit tests using test runner & kill test runner when complete
+open Fake.Testing
 
 Target "RunTests" (fun _ ->
-    let nunitVersion = GetPackageVersion "packages" "NUnit.Runners"
-    let nunitPath = sprintf "packages/NUnit.Runners.%s/Tools" nunitVersion
-    ActivateFinalTarget "CloseTestRunner"
+//    let nunitPath = sprintf  nunitVersion
+//    ActivateFinalTarget "CloseTestRunner"
 
     testAssemblies
-    |> NUnit (fun p ->
+    |> NUnit3 (fun p ->
         { p with
-            ToolPath = nunitPath
-            DisableShadowCopy = true
+            ToolPath = "packages/test/NUnit.ConsoleRunner/tools/nunit3-console.exe"
+            ShadowCopy = false
             TimeOut = TimeSpan.FromMinutes 20.
-            OutputFile = "TestResults.xml" })
+            OutputDir = "bin/tests/TestResults.xml" })
 )
 
-FinalTarget "CloseTestRunner" (fun _ ->
-    ProcessHelper.killProcess "nunit-agent.exe"
-)
+//FinalTarget "CloseTestRunner" (fun _ ->
+//    ProcessHelper.killProcess "nunit-agent.exe"
+//)
 
 // --------------------------------------------------------------------------------------
 // Build a NuGet package

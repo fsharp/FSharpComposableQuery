@@ -8,6 +8,8 @@ frameworks
     let x86source = sprintf "packages/test/System.Data.SQLite.Core/build/%s/x86" fwrk
     let x64target = sprintf "packages/test/System.Data.SQLite.Core/lib/%s/x64" fwrk
     let x64source = sprintf "packages/test/System.Data.SQLite.Core/build/%s/x64" fwrk
-    CopyDir x86target x86source (fun _ -> true)
-    CopyDir x64target x64source (fun _ -> true)
+    if not (directoryExists x86target) then
+        CopyDir x86target x86source (fun _ -> true)
+    if not (directoryExists x64target) then
+        CopyDir x64target x64source (fun _ -> true)
 )

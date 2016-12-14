@@ -1,4 +1,4 @@
-NUnit
 group test
+NUnit
 SQLprovider
 System.Data.SQLite.Core

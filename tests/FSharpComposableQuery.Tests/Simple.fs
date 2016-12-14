@@ -2,6 +2,7 @@
 
 open System
 open System.Linq
+open System.Data.Linq.SqlClient
 open Microsoft.FSharp.Linq
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
@@ -22,7 +23,7 @@ module Simple =
     
 //    type internal schema = SqlDataConnection<ConnectionStringName="QueryConnectionString", ConfigFile=dbConfigPath>
 
-    let [<Literal>] connectionString = "DataSource=" + __SOURCE_DIRECTORY__ + @"../databases/simple.db;" + "Version=3;foreign keys = true"
+    let [<Literal>] connectionString = "DataSource=" + __SOURCE_DIRECTORY__ + @"/../databases/simple.db;" + "Version=3;foreign keys = true"
     let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net46"
     type sql = SqlDataProvider<
                 Common.DatabaseProviderTypes.SQLITE
@@ -34,8 +35,8 @@ module Simple =
     [<TestFixture>]
     type TestClass() = 
 
-        let db = sql.GetDataContext()
-
+        let db = sql.GetDataContext().Main
+        
         let data = [1; 5; 7; 11; 18; 21]
 
         let mutable idx = 0
@@ -50,7 +51,7 @@ module Simple =
             let q =
               <@ query {
                     for student in db.Student do
-                    select student.Age.Value
+                    select student.Age
                     contains 11
                     } @>
             Utils.Run q
@@ -100,7 +101,7 @@ module Simple =
             let q =
               <@ query {
                     for student in db.Student do
-                    where (student.StudentID = 1)
+                    where (student.StudentId = 1)
                     select student
                     exactlyOne
                     } @>
@@ -114,7 +115,7 @@ module Simple =
             let q =
               <@ query {
                     for student in db.Student do
-                    where (student.StudentID = 1)
+                    where (student.StudentId = 1)
                     select student
                     exactlyOneOrDefault
                     } @>
@@ -153,7 +154,7 @@ module Simple =
             let q =
               <@ query {
                     for student in db.Student do
-                    where (student.StudentID > 4)
+                    where (student.StudentId > 4)
                     select student
                     } @>
             Utils.Run q
@@ -165,7 +166,7 @@ module Simple =
             let q =
               <@ query {
                     for student in db.Student do
-                    minBy student.StudentID
+                    minBy student.StudentId
                 } @>
             Utils.Run q
 
@@ -177,7 +178,7 @@ module Simple =
             let q =
               <@ query {
                     for student in db.Student do
-                    maxBy student.StudentID
+                    maxBy student.StudentId
                 } @>
             Utils.Run q
 
@@ -225,8 +226,8 @@ module Simple =
             tag "thenBy query operator."
             let q = <@ query {
                 for student in db.Student do
-                where student.Age.HasValue
-                sortBy student.Age.Value
+                where (student.Age <> -1)
+                sortBy student.Age
                 thenBy student.Name
                 select student
             } @>
@@ -239,8 +240,8 @@ module Simple =
             tag "thenByDescending query operator."
             let q = <@ query {
                 for student in db.Student do
-                where student.Age.HasValue
-                sortBy student.Age.Value
+                where (student.Age <> -1)
+                sortBy student.Age
                 thenByDescending student.Name
                 select student
             } @>
@@ -298,7 +299,7 @@ module Simple =
             tag "averageBy"
             let q = <@ query {
                 for student in db.Student do
-                averageBy (float student.StudentID)
+                averageBy (float student.StudentId)
                 } @>
             Utils.Run q
 
@@ -387,7 +388,7 @@ module Simple =
             tag "sumBy query operator"
             let q = <@ query {
                for student in db.Student do
-               sumBy student.StudentID
+               sumBy student.StudentId
                } @>
             Utils.Run q
 
@@ -421,7 +422,7 @@ module Simple =
             tag "sortByNullable query operator"
             let q = <@ query {
                 for student in db.Student do
-                sortByNullable student.Age
+                sortByNullable (Nullable student.Age)
                 select student
             } @>
             Utils.Run q
@@ -433,7 +434,7 @@ module Simple =
             tag "sortByNullableDescending query operator"
             let q = <@ query {
                 for student in db.Student do
-                sortByNullableDescending student.Age
+                sortByNullableDescending (Nullable student.Age)
                 select student
             } @>
             Utils.Run q
@@ -446,7 +447,7 @@ module Simple =
             let q = <@ query {
                 for student in db.Student do
                 sortBy student.Name
-                thenByNullable student.Age
+                thenByNullable (Nullable student.Age)
                 select student
             } @>
             Utils.Run q
@@ -459,7 +460,7 @@ module Simple =
             let q = <@ query {
                 for student in db.Student do
                 sortBy student.Name
-                thenByNullableDescending student.Age
+                thenByNullableDescending (Nullable student.Age)
                 select student
             } @>
             Utils.Run q
@@ -494,7 +495,7 @@ module Simple =
                     for student in db.Student do
                     where (ExtraTopLevelOperators.query 
                                   { for courseSelection in db.CourseSelection do
-                                    exists (courseSelection.StudentID = student.StudentID) })
+                                    exists (courseSelection.StudentId = student.StudentId) })
                     select student } @>
             Utils.Run q
 
@@ -508,7 +509,7 @@ module Simple =
                     for student in db.Student do
                     where (query 
                                   { for courseSelection in db.CourseSelection do
-                                    exists (courseSelection.StudentID = student.StudentID) })
+                                    exists (courseSelection.StudentId = student.StudentId) })
                     select student } @>
             Utils.Run q
 
@@ -543,7 +544,7 @@ module Simple =
             let q = <@ query {
                     for student in db.Student do
                     groupBy student.Age into g
-                    where (g.Key.HasValue && g.Key.Value > 10)
+                    where (g.Key > 10)
                     select (g, g.Key)
             } @>
             Utils.Run q
@@ -568,7 +569,7 @@ module Simple =
             let q = <@ query {
                     for student in db.Student do
                     groupBy student.Age into g        
-                    let total = query { for student in g do sumByNullable student.Age }
+                    let total = query { for student in g do sumByNullable (Nullable student.Age) }
                     select (g.Key, g.Count(), total)
             } @>
             Utils.Run q
@@ -597,7 +598,7 @@ module Simple =
                                    select id }
             let q = <@ query {
                     for student in db.Student do
-                    where (idQuery.Contains(student.StudentID))
+                    where (idQuery.Contains(student.StudentId))
                     select student
                     } @>
             Utils.Run q
@@ -647,7 +648,7 @@ module Simple =
             let q = <@ query {
                 for n in db.Student do
                 where (SqlMethods.Like( n.Name, "[^abc]%") )
-                select n.StudentID    
+                select n.StudentId    
                 } @>
             Utils.Run q
 
@@ -681,7 +682,7 @@ module Simple =
             let q = <@ query {
                     for student in db.Student do 
                     join selection in db.CourseSelection 
-                      on (student.StudentID = selection.StudentID)
+                      on (student.StudentId = selection.StudentId)
                     select (student, selection)
                 } @>
             Utils.Run q
@@ -694,7 +695,7 @@ module Simple =
             let q = <@ query {
                 for student in db.Student do
                 leftOuterJoin selection in db.CourseSelection 
-                  on (student.StudentID = selection.StudentID) into result
+                  on (student.StudentId = selection.StudentId) into result
                 for selection in result.DefaultIfEmpty() do
                 select (student, selection)
                 } @>
@@ -707,7 +708,7 @@ module Simple =
             tag "Join with count"
             let q = <@ query {
                     for n in db.Student do 
-                    join e in db.CourseSelection on (n.StudentID = e.StudentID)
+                    join e in db.CourseSelection on (n.StudentId = e.StudentId)
                     count        
                 } @>
             Utils.Run q
@@ -719,7 +720,7 @@ module Simple =
             tag "Join with distinct."
             let q = <@ query {
                     for student in db.Student do 
-                    join selection in db.CourseSelection on (student.StudentID = selection.StudentID)
+                    join selection in db.CourseSelection on (student.StudentId = selection.StudentId)
                     distinct        
                 } @>
             Utils.Run q
@@ -731,7 +732,7 @@ module Simple =
             tag "Join with distinct and count."
             let q = <@ query {
                     for n in db.Student do 
-                    join e in db.CourseSelection on (n.StudentID = e.StudentID)
+                    join e in db.CourseSelection on (n.StudentId = e.StudentId)
                     distinct
                     count       
                 } @>
@@ -744,7 +745,7 @@ module Simple =
             tag "Selecting students with age between 10 and 15."
             let q = <@ query {
                     for student in db.Student do
-                    where (student.Age.Value >= 10 && student.Age.Value < 15)
+                    where (student.Age >= 10 && student.Age.Value < 15)
                     select student
                 } @>
             Utils.Run q
@@ -756,7 +757,7 @@ module Simple =
             tag "Selecting students with age either 11 or 12."
             let q = <@ query {
                     for student in db.Student do
-                    where (student.Age.Value = 11 || student.Age.Value = 12)
+                    where (student.Age = 11 || student.Age = 12)
                     select student
                 } @>
             Utils.Run q
@@ -768,7 +769,7 @@ module Simple =
             tag "Selecting students in a certain age range and sorting."
             let q = <@ query {
                     for n in db.Student do
-                    where (n.Age.Value = 12 || n.Age.Value = 13)
+                    where (n.Age = 12 || n.Age = 13)
                     sortByNullableDescending n.Age
                     select n
                 } @>
@@ -781,8 +782,8 @@ module Simple =
             tag "Selecting students with certain ages, taking account of possibility of nulls."
             let q = <@ query {
                     for student in db.Student do
-                    where ((student.Age.HasValue && student.Age.Value = 11) ||
-                           (student.Age.HasValue && student.Age.Value = 12))
+                    where ((student.Age = 11) ||
+                           (student.Age = 12))
                     sortByDescending student.Name 
                     select student.Name
                     take 2
@@ -840,9 +841,9 @@ module Simple =
             tag "Using if statement to alter results for special value."
             let q = <@ query {
                     for student in db.Student do
-                    select (if student.Age.HasValue && student.Age.Value = -1 then
-                               (student.StudentID, System.Nullable<int>(100), student.Age)
-                            else (student.StudentID, student.Age, student.Age))
+                    select (if student.Age = -1 then
+                               (student.StudentId, 100, student.Age)
+                            else (student.StudentId, student.Age, student.Age))
                 } @>
             Utils.Run q
 
@@ -853,11 +854,11 @@ module Simple =
             tag "Using if statement to alter results special values."
             let q = <@ query {
                     for student in db.Student do
-                    select (if student.Age.HasValue && student.Age.Value = -1 then
-                               (student.StudentID, System.Nullable<int>(100), student.Age)
-                            elif student.Age.HasValue && student.Age.Value = 0 then
-                                (student.StudentID, System.Nullable<int>(100), student.Age)
-                            else (student.StudentID, student.Age, student.Age))
+                    select (if  student.Age = -1 then
+                               (student.StudentId, 100, student.Age)
+                            elif student.Age = 0 then
+                                (student.StudentId, 100, student.Age)
+                            else (student.StudentId, student.Age, student.Age))
                 } @>
             Utils.Run q
 
@@ -882,9 +883,9 @@ module Simple =
             let q = <@ query {
                 for student in db.Student do
                 join courseSelection in db.CourseSelection on
-                    (student.StudentID = courseSelection.StudentID)
+                    (student.StudentId = courseSelection.StudentId)
                 join course in db.Course on
-                      (courseSelection.CourseID = course.CourseID)
+                      (courseSelection.CourseId = course.CourseId)
                 select (student.Name, course.CourseName)
             } @>
             Utils.Run q
@@ -897,10 +898,10 @@ module Simple =
             let q = <@ query {
                for student in db.Student do
                 leftOuterJoin courseSelection in db.CourseSelection 
-                  on (student.StudentID = courseSelection.StudentID) into g1
+                  on (student.StudentId = courseSelection.StudentId) into g1
                 for courseSelection in g1.DefaultIfEmpty() do
                 leftOuterJoin course in db.Course 
-                  on (courseSelection.CourseID = course.CourseID) into g2
+                  on (courseSelection.CourseId = course.CourseId) into g2
                 for course in g2.DefaultIfEmpty() do
                 select (student.Name, course.CourseName)
                 } @>

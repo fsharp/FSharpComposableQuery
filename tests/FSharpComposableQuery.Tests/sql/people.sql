@@ -1,8 +1,8 @@
 DROP TABLE IF EXISTS People;
 CREATE TABLE People (
-    Name NVARCHAR (255) NOT NULL,
-    Age   INT           NOT NULL,
-    PRIMARY KEY (Name,Age ASC)
+    [Name] NVARCHAR (255) NOT NULL,
+    [Age]   INT           NOT NULL,
+    PRIMARY KEY ([Name],[Age] ASC)
 );
 
 DROP TABLE IF EXISTS Couples;

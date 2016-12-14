@@ -5,6 +5,7 @@ open Microsoft.FSharp.Linq
 open Microsoft.FSharp.Data.TypeProviders
 open NUnit.Framework
 open System.Linq
+open FSharp.Data.Sql
 
 /// <summary>
 /// Contains example queries and operations on the Organisation database.
@@ -12,18 +13,24 @@ open System.Linq
 /// <para>These tests require the schema from sql/organisation.sql in a database referred to in app.config </para>
 /// </summary>
 module Nested =
-    type internal dbSchema = SqlDataConnection< ConnectionStringName="OrgConnectionString", ConfigFile="db.config" >
-    
-
+    let [<Literal>] connectionString = "DataSource=" + __SOURCE_DIRECTORY__ + @"/../databases/organisation.db;" + "Version=3;foreign keys = true"
+    let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net46"
+    type sql = SqlDataProvider<
+                Common.DatabaseProviderTypes.SQLITE
+            ,   SQLiteLibrary = Common.SQLiteLibrary.SystemDataSQLite
+            ,   ConnectionString = connectionString
+            ,   ResolutionPath = resolutionPath
+            ,   CaseSensitivityChange = Common.CaseSensitivityChange.ORIGINAL
+            >
     // Schema declarations
-    type internal Department = dbSchema.ServiceTypes.Departments
+    type internal Department = sql.dataContext.``main.DepartmentsEntity``
 
     // TypeProvider type abbreviations. 
-    type internal Employee = dbSchema.ServiceTypes.Employees
+    type internal Employee = sql.dataContext.``main.EmployeesEntity``
 
-    type internal Contact = dbSchema.ServiceTypes.Contacts
+    type internal Contact = sql.dataContext.``main.ContactsEntity``
 
-    type internal Task = dbSchema.ServiceTypes.Tasks
+    type internal Task = sql.dataContext.``main.TasksEntity``
     
     //Nested type declarations
     type EmployeeTasks =
@@ -36,7 +43,7 @@ module Nested =
 
     type NestedOrg = System.Linq.IQueryable<DepartmentEmployees>
 
-    let internal db = dbSchema.GetDataContext()
+    let internal db = sql.GetDataContext().Main
 
     [<TestFixture>]
     type TestClass() =

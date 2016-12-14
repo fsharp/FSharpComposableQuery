@@ -4,6 +4,8 @@ open Microsoft.FSharp.Data.TypeProviders
 open Microsoft.FSharp.Quotations
 open System.Linq
 open NUnit.Framework
+open FSharp.Data.Sql
+
 
 /// <summary>
 /// Contains example queries and operations on the People database. 
@@ -14,18 +16,25 @@ module People =
 
     [<Literal>]
     let internal N_COUPLES = 5000
-    [<Literal>]
-    let dbConfigPath = "db.config"
-    
-    type internal dbSchemaPeople = SqlDataConnection< ConnectionStringName="PeopleConnectionString", ConfigFile=dbConfigPath>
-    type internal Couple = dbSchemaPeople.ServiceTypes.Couples
 
-    type internal Person = dbSchemaPeople.ServiceTypes.People
+    let [<Literal>] connectionString = "DataSource=" + __SOURCE_DIRECTORY__ + @"/../databases/people.db;" + "Version=3;foreign keys = true"
+    let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net46"
+    type sql = SqlDataProvider<
+                Common.DatabaseProviderTypes.SQLITE
+            ,   SQLiteLibrary = Common.SQLiteLibrary.SystemDataSQLite
+            ,   ConnectionString = connectionString
+            ,   ResolutionPath = resolutionPath
+            ,   CaseSensitivityChange = Common.CaseSensitivityChange.ORIGINAL
+            >
+
+    type internal Couple = sql.dataContext.``main.CouplesEntity``
+
+    type internal Person = sql.dataContext.``main.PeopleEntity``
 
     // Used in example 1
     type internal Result = { Name : string; Diff : int }
 
-    let internal db = dbSchemaPeople.GetDataContext()
+//    let internal db = dbSchemaPeople.GetDataContext()
 
     // Used in example 6
     type internal Predicate =

@@ -6,6 +6,7 @@ open NUnit.Framework
 open System.Linq
 open System.Xml.Linq
 open FSharpComposableQuery
+open FSharp.Data.Sql
 
 /// <summary>
 /// Contains example queries and operations on the Xml database. 
@@ -20,13 +21,20 @@ module Xml =
 
     let basicXml = XElement.Parse "<a id='1'><b><c>foo</c></b><d><e/><f/></d></a>"
 
-    type internal schema = SqlDataConnection< ConnectionStringName="XmlConnectionString", ConfigFile=dbConfigPath>
+    let [<Literal>] connectionString = "DataSource=" + __SOURCE_DIRECTORY__ + @"/../databases/xml.db;" + "Version=3;foreign keys = true"
+    let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net46"
+    type sql = SqlDataProvider<
+                Common.DatabaseProviderTypes.SQLITE
+            ,   SQLiteLibrary = Common.SQLiteLibrary.SystemDataSQLite
+            ,   ConnectionString = connectionString
+            ,   ResolutionPath = resolutionPath
+            ,   CaseSensitivityChange = Common.CaseSensitivityChange.ORIGINAL
+            >
+    type internal Data = sql.dataContext.``main.DataEntity``
 
-    type internal Data = schema.ServiceTypes.Data
+    type internal Text = sql.dataContext.``main.DataEntity``
 
-    type internal Text = schema.ServiceTypes.Text
-
-    type internal Attribute = schema.ServiceTypes.Attribute
+    type internal Attribute =  sql.dataContext.``main.AttributeEntity``
 
     type Axis =
         | Self
@@ -76,7 +84,7 @@ module Xml =
         /// <param name="path2">The path filter. </param>
         static member (^^) (path1, path2) = Seq(path1, Filter(path2))
 
-    let internal db = schema.GetDataContext()
+    let internal db = sql.GetDataContext().Main
     let internal data = db.Data
     let internal text = db.Text
     let internal attributes = db.Attribute
@@ -188,8 +196,8 @@ module Xml =
     let internal axisPred axis =
         let rec axisPredRec axis =
             match axis with
-            | Self -> <@ fun (row1 : Data) (row2 : Data) -> row1.ID = row2.ID @>
-            | Child -> <@ fun (row1 : Data) (row2 : Data) -> row1.ID = row2.Parent @>
+            | Self -> <@ fun (row1 : Data) (row2 : Data) -> row1.Id = row2.ID @>
+            | Child -> <@ fun (row1 : Data) (row2 : Data) -> row1.Id = row2.Parent @>
             | Descendant -> <@ fun (row1 : Data) (row2 : Data) -> row1.Pre < row2.Pre && row2.Post < row1.Post @>
             | DescendantOrSelf -> <@ fun (row1 : Data) (row2 : Data) -> row1.Pre <= row2.Pre && row2.Post <= row1.Post @>
             | Following -> <@ fun (row1 : Data) (row2 : Data) -> row1.Post < row2.Pre @>
@@ -212,7 +220,7 @@ module Xml =
                             exists ((%(pathQ p1)) row1 row2 && (%(pathQ p2)) row2 row3)
                     } @>
             | Axis ax -> <@ fun (row : Data) (row' : Data) -> ((%(axisPred ax)) row row') @>
-            | Name name -> <@ fun (row : Data) (row' : Data) -> row.Name = name && row.ID = row'.ID @>
+            | Name name -> <@ fun (row : Data) (row' : Data) -> row.Name = name && row.Id = row'.Id @>
             | Filter p ->
                 <@ fun (row : Data) (row' : Data) ->
                     row.ID = row'.ID && query {
@@ -236,7 +244,7 @@ module Xml =
         <@ query {
                for root in %data do
                    for row' in (%(pathQuery data p)) root do
-                       if (root.Parent = -1 && root.Entry = rootId) then yield row'.ID
+                       if (root.Parent = -1 && root.Entry = rootId) then yield row'.Id
            } @>
 
 

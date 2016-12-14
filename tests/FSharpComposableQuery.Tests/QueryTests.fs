@@ -7,20 +7,27 @@ open Microsoft.FSharp.Data.TypeProviders
 open Microsoft.FSharp.Linq
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
-open NUnit.Framework;
+open NUnit.Framework
+open FSharp.Data.Sql
 
 open FSharpComposableQuery
 
 module QueryTests = 
-    [<Literal>]
-    let dbConfigPath = "db.config"
 
-    type internal schema = SqlDataConnection<ConnectionStringName="QueryConnectionString", ConfigFile=dbConfigPath>
+    let [<Literal>] connectionString = "DataSource=" + __SOURCE_DIRECTORY__ + @"/../databases/simple.db;" + "Version=3;foreign keys = true"
+    let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net46"
+    type sql = SqlDataProvider<
+                Common.DatabaseProviderTypes.SQLITE
+            ,   SQLiteLibrary = Common.SQLiteLibrary.SystemDataSQLite
+            ,   ConnectionString = connectionString
+            ,   ResolutionPath = resolutionPath
+            ,   CaseSensitivityChange = Common.CaseSensitivityChange.ORIGINAL
+            >
 
     [<TestFixture>]
     type TestClass() = 
 
-        let db = schema.GetDataContext()
+        let db = sql.GetDataContext().Main
 
         let data = [1; 5; 7; 11; 18; 21]
 

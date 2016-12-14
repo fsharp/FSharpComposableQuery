@@ -44,24 +44,22 @@ module QueryTests =
     [<Test>]
     let ``contains query operator``() = 
         tag "contains query operator"
-        let result1 =
-            query {
-                for student in db.Student do
+        let result1 = query {
+            for student in db.Student do
                 select student.Age
                 contains 11
-                }
+        }
         result1 |> printfn "Is at least one student age 11? %b" 
 
 
     [<Test>]
     let ``count query operator``() = 
         tag "count query operator"
-        let result2 =
-            query {
-                for student in db.Student do
+        let result2 = query {
+            for student in db.Student do
                 select student
                 count
-                }
+        }
 
         result2 |> printfn "Number of students: %d" 
 
@@ -69,107 +67,98 @@ module QueryTests =
     [<Test>]
     let ``last query operator.``() = 
         tag "last query operator." 
-        let result3 =
-            query {
-                for s in data do
+        let result3 = query {
+            for s in data do
                 sortBy s
                 last
-                }
+        }
         printfn "Last: %d" result3
 
 
     [<Test>]
     let ``lastOrDefault query operator.``() = 
         tag "lastOrDefault query operator." 
-        let result4 =
-            query {
-                    for number in data do
-                    sortBy number
-                    lastOrDefault
-                    }
+        let result4 = query {
+            for number in data do
+                sortBy number
+                lastOrDefault
+        }
         result4 |> printfn "lastOrDefault: %d"
 
 
     [<Test>]
     let ``exactlyOne query operator.``() = 
         tag "exactlyOne query operator."
-        let student2 =
-            query {
-                for student in db.Student do
+        let student2 = query {
+            for student in db.Student do
                 where (student.StudentId = 1)
                 select student
                 exactlyOne
-                }
+        }
         printfn "Student with StudentId = 1 is %s" student2.Name
 
 
     [<Test>]
     let ``exactlyOneOrDefault query operator.``() = 
         tag "exactlyOneOrDefault query operator."
-        let student3 =
-            query {
-                for student in db.Student do
+        let student3 = query {
+            for student in db.Student do
                 where (student.StudentId = 1)
                 select student
                 exactlyOneOrDefault
-                }
+        }
         printfn "Student with StudentId = 1 is %s" student3.Name
 
 
     [<Test>]
     let ``headOrDefault query operator.``() = 
         tag "headOrDefault query operator."
-        let student4 =
-            query {
-                for student in db.Student do
+        let student4 = query {
+            for student in db.Student do
                 select student
                 headOrDefault
-                }
+        }
         printfn "head student is %s" student4.Name
 
 
     [<Test>]
     let ``select query operator.``() = 
         tag "select query operator."
-        let select5 = 
-            query {
-                for (student) in db.Student do
+        let select5 = query {
+            for (student) in db.Student do
                 select student
-                }
+        }
         select5 |> Seq.iter (fun (student) -> printfn "StudentId, Name: %d %s" student.StudentId student.Name)
 
 
     [<Test>]
     let ``where query operator.``() = 
         tag "where query operator."
-        let select6 = 
-            query {
-                for student in db.Student do
+        let select6 = query {
+            for student in db.Student do
                 where (student.StudentId > 4)
                 select student
-                }
+        }
         select6 |> Seq.iter (fun student -> printfn "StudentId, Name: %d %s" student.StudentId student.Name)
         ignore 0
 
     [<Test>]
     let ``minBy query operator.``() = 
         tag "minBy query operator."
-        let student5 =
-            query {
-                for student in db.Student do
+        let student5 = query {
+            for student in db.Student do
                 minBy student.StudentId
-            }
+        }
         ignore 0
 
 
     [<Test>]
     let ``maxBy query operator.``() = 
         tag "maxBy query operator."
-        let student6 =
-            query {
-                for student in db.Student do
+        let student6 = query {
+            for student in db.Student do
                 maxBy student.StudentId
-            }
+        }
         ignore 0
 
     
@@ -179,9 +168,9 @@ module QueryTests =
         tag "groupBy query operator."
         query {
             for student in db.Student do
-            groupBy student.Age into g
-            select (g.Key, g.Count())
-            }
+                groupBy student.Age into g
+                select (g.Key, g.Count())
+        }
         |> Seq.iter (fun (age, count) -> printfn "Age: %i Count at that age: %d"  age count)
 
 
@@ -190,8 +179,8 @@ module QueryTests =
         tag "sortBy query operator."
         query {
             for student in db.Student do
-            sortBy student.Name
-            select student
+                sortBy student.Name
+                select student
         }
         |> Seq.iter (fun student -> printfn "StudentId, Name: %d %s" student.StudentId student.Name)
 
@@ -201,8 +190,8 @@ module QueryTests =
         tag "sortByDescending query operator."
         query {
             for student in db.Student do
-            sortByDescending student.Name
-            select student
+                sortByDescending student.Name
+                select student
         }
         |> Seq.iter (fun student -> printfn "StudentId, Name: %d %s" student.StudentId student.Name)
 
@@ -212,10 +201,10 @@ module QueryTests =
         tag "thenBy query operator."
         query {
             for student in db.Student do
-            where (student.Age >= 0)
-            sortBy student.Age
-            thenBy student.Name
-            select student
+                where (student.Age >= 0)
+                sortBy student.Age
+                thenBy student.Name
+                select student
         }
         |> Seq.iter (fun student -> printfn "StudentId, Name: %d %s" student.Age student.Name)
 
@@ -225,10 +214,10 @@ module QueryTests =
         tag "thenByDescending query operator."
         query {
             for student in db.Student do
-            where (student.Age >= 0)
-            sortBy student.Age
-            thenByDescending student.Name
-            select student
+                where (student.Age >= 0)
+                sortBy student.Age
+                thenByDescending student.Name
+                select student
         }
         |> Seq.iter (fun student -> printfn "StudentId, Name: %d %s" student.Age student.Name)
 
@@ -238,9 +227,9 @@ module QueryTests =
         tag "groupValBy query operator."
         query {
             for student in db.Student do
-            groupValBy student.Name student.Age into g
-            select (g, g.Key, g.Count())
-            }
+                groupValBy student.Name student.Age into g
+                select (g, g.Key, g.Count())
+        }
         |> Seq.iter (fun (group, age, count) ->
             printfn "Age: %i Count at that age: %i" age count
             group |> Seq.iter (fun name -> printfn "Name: %s" name))
@@ -251,8 +240,8 @@ module QueryTests =
         tag "sumByNullable query operator"
         query {
             for student in db.Student do
-            sumBy student.Age
-            }
+                sumBy student.Age
+        }
         |> (fun sum -> printfn "Sum of ages: %i" sum)
 
 
@@ -261,8 +250,8 @@ module QueryTests =
         tag "minByNullable"
         query {
             for student in db.Student do
-            minBy student.Age
-            }
+                minBy student.Age
+        }
         |> (fun age -> printfn "Minimum age: %i" age)
 
 
@@ -271,8 +260,8 @@ module QueryTests =
         tag "maxByNullable"
         query {
             for student in db.Student do
-            maxByNullable (Nullable student.Age)
-            }
+                maxByNullable (Nullable student.Age)
+        }
         |> (fun age -> printfn "Maximum age: %s" (printNullable age))
 
 
@@ -281,8 +270,8 @@ module QueryTests =
         tag "averageBy"
         query {
             for student in db.Student do
-            averageBy (float student.StudentId)
-            }
+                averageBy (float student.StudentId)
+        }
         |> printfn "Average student ID: %f"
 
 
@@ -765,14 +754,14 @@ module QueryTests =
         tag "Union of two queries."
 
         let query1 = query {
-                for n in db.Student do
+            for n in db.Student do
                 select (n.Name, n.Age)
-            }
+        }
 
         let query2 = query {
-                for n in db.LastStudent do
+            for n in db.LastStudent do
                 select (n.Name, n.Age)
-                }
+        }
 
         query2.Union (query1)
         |> Seq.iter (fun (name, age) -> printfn "%s %s" name (printNullable<|Nullable age))
@@ -782,14 +771,14 @@ module QueryTests =
     let ``Intersect of two queries.``() = 
         tag "Intersect of two queries."
         let query1 = query {
-                for n in db.Student do
+            for n in db.Student do
                 select (n.Name, n.Age)
-            }
+        }
 
         let query2 = query {
-                for n in db.LastStudent do
+            for n in db.LastStudent do
                 select (n.Name, n.Age)
-                }
+        }
 
         query1.Intersect(query2)
         |> Seq.iter (fun (name, age) -> printfn "%s %s" name (printNullable<| Nullable age))
@@ -799,7 +788,7 @@ module QueryTests =
     let ``Using if statement to alter results for special value.``() = 
         tag "Using if statement to alter results for special value."
         query {
-                for student in db.Student do
+            for student in db.Student do
                 select (if student.Age = -1 then
                             (student.StudentId, 100, student.Age)
                         else (student.StudentId, student.Age, student.Age))
@@ -811,7 +800,7 @@ module QueryTests =
     let ``Using if statement to alter results special values.``() = 
         tag "Using if statement to alter results special values."
         query {
-                for student in db.Student do
+            for student in db.Student do
                 select (if  student.Age = -1 then
                             (student.StudentId,100, student.Age)
                         elif student.Age = 0 then
@@ -826,9 +815,9 @@ module QueryTests =
     let ``Multiple table select.``() = 
         tag "Multiple table select."
         query {
-                for student in db.Student do
+            for student in db.Student do
                 for course in db.Course do
-                select (student, course)
+                    select (student, course)
         }
         |> Seq.iteri (fun index (student, course) ->
             if (index = 0) then printfn "StudentId Name Age CourseId CourseName"
@@ -860,7 +849,7 @@ module QueryTests =
             leftOuterJoin course in db.Course 
                 on (courseSelection.CourseId = course.CourseId) into g2
             for course in g2.DefaultIfEmpty() do
-            select (student.Name, course.CourseName)
-            }
+                select (student.Name, course.CourseName)
+        }
         |> Seq.iter (fun (studentName, courseName) -> printfn "%s %s" studentName courseName)
 

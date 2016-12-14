@@ -190,12 +190,8 @@ Target "ReleaseDocs" (fun _ ->
 
 #r "System.Data"
 open System.Data
-open System.Data.SqlClient
 #r @"packages/test/System.Data.SQLite.Core/lib/net451/System.Data.SQLite.dll"
 open System.Data.SQLite
-open System.Text.RegularExpressions
-
-let batchRe = Regex("^GO", RegexOptions.Compiled ||| RegexOptions.IgnoreCase ||| RegexOptions.Multiline)
 
 Target "DbSetup" (fun _ ->
    let scriptsDir = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "tests/FSharpComposableQuery.Tests/sql")
@@ -203,21 +199,12 @@ Target "DbSetup" (fun _ ->
        let dbname = System.IO.Path.GetFileNameWithoutExtension(f)
        use conn = new SQLiteConnection(sprintf "DataSource=%s.db" dbname)
        conn.Open()
-       printfn "Processing file: %s" f
+       printfn "Creating db: %s" f
        let scriptTxt = ReadFileAsString f
-       let batches = batchRe.Split(scriptTxt) |> Array.filter(fun b -> b.Length > 0)
-       for batch in batches do
-           use cmd = conn.CreateCommand()
-           cmd.CommandText <- batch
-           try
-               use rdr = cmd.ExecuteReader()
-               ()
-           with
-           | :? SqlException as ex -> 
-               printfn "Error in SQL batch: \"%s\"" batch
-               reraise()
-           ()
-       printfn "\n"
+       use cmd = conn.CreateCommand()
+       cmd.CommandText <- scriptTxt
+       use rdr = cmd.ExecuteReader()
+       ()
    printfn "Finished!"
 )
 

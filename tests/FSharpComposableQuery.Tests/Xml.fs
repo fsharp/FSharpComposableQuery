@@ -195,15 +195,17 @@ module Xml =
         let sqlcmd cmdtxt = 
             use cmd = new SQLiteCommand(cmdtxt,conn)
             cmd.ExecuteNonQuery()|>ignore
-        sqlcmd "TRUNCATE TABLE [FCQ-Xml].[dbo].[Attribute]"
-        sqlcmd "TRUNCATE TABLE [FCQ-Xml].[dbo].[Text]"
-        sqlcmd "TRUNCATE TABLE [FCQ-Xml].[dbo].[Data]"
+        sqlcmd "DROP TABLE [xml].[dbo].[Attribute]"
+        sqlcmd "DROP TABLE [xml].[dbo].[Text]"
+        sqlcmd "DROP TABLE [xml].[dbo].[Data]"
+        conn.Close()
+
 
     /// <summary>
     /// Loads the basicXml file
     /// </summary>
     let loadBasicXml() =
-        dropTables()
+//        dropTables()
         insertXml 0 basicXml
 
     /// <summary>
@@ -271,40 +273,38 @@ module Xml =
     let xp2 = Path.Descendant / (Filter(Path.FollowingSibling % "dirn"))                    //  //*[following-sibling::d]
     let xp3 = Path.Descendant % "year" / Filter(Path.Ancestor / Path.Preceding % "dir")     //  //f[ancestor::*/preceding::b]
 
-    [<TestFixture>]
-    type TestClass() =
 
-        [<TestFixtureSetUp>]
-        member public this.init() =
-            printf "Xml: Parsing file %A... " xmlPath
-            dropTables()
-            loadXml 0 xmlPath
-            printfn "done!"
+    [<OneTimeSetUp>]
+    let init() =
+        printf "Xml: Parsing file %A... " xmlPath
+        dropTables()
+        loadXml 0 xmlPath
+        printfn "done!"
 
-        [<Test>]
-        member this.test01() =
-            printfn "%s" "xp0"
-            xp0
-            |> xpath 0 <@ data @>
-            |> Utils.Run
+    [<Test>]
+    let test01() =
+        printfn "%s" "xp0"
+        xp0
+        |> xpath 0 <@ data @>
+        |> Utils.Run
 
-        [<Test>]
-        member this.test02() =
-            printfn "%s" "xp1"
-            xp1
-            |> xpath 0 <@ data @>
-            |> Utils.Run
+    [<Test>]
+    let test02() =
+        printfn "%s" "xp1"
+        xp1
+        |> xpath 0 <@ data @>
+        |> Utils.Run
 
-        [<Test>]
-        member this.test03() =
-            printfn "%s" "xp2"
-            xp2
-            |> xpath 0 <@ data @>
-            |> Utils.Run
+    [<Test>]
+    let test03() =
+        printfn "%s" "xp2"
+        xp2
+        |> xpath 0 <@ data @>
+        |> Utils.Run
 
-        [<Test>]
-        member this.test04() =
-            printfn "%s" "xp3"
-            xp3
-            |> xpath 0 <@ data @>
-            |> Utils.Run
+    [<Test>]
+    let test04() =
+        printfn "%s" "xp3"
+        xp3
+        |> xpath 0 <@ data @>
+        |> Utils.Run

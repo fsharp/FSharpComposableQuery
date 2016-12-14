@@ -1,11 +1,41 @@
 ﻿namespace FSharpComposableQuery.Tests
 
 open System
+open System.IO
 open System.Linq
 open System.Reflection
 open Microsoft.FSharp.Linq
 open Microsoft.FSharp.Quotations
 open FSharpComposableQuery
+open System.Data.SQLite
+open NUnit
+open NUnit.Framework
+
+[<SetUpFixtureAttribute>]
+type Init() =
+    
+    let restoreDBs () =
+        printfn "Restoring DBs to initial state"
+        for f in Directory.EnumerateFiles (__SOURCE_DIRECTORY__ + "../../sql" ) do
+            let dbname = System.IO.Path.GetFileNameWithoutExtension(f)
+            let dbdir = __SOURCE_DIRECTORY__ + "../../databases"
+            use conn = new SQLiteConnection(sprintf "DataSource=%s/%s.db" dbdir dbname)
+            conn.Open()
+            printfn "Creating db: %s" dbname
+            let scriptTxt = File.ReadAllText f
+            use cmd = conn.CreateCommand()
+            cmd.CommandText <- scriptTxt
+            use rdr = cmd.ExecuteReader()
+            ()
+        printfn "Finished!"
+    
+    [<OneTimeSetUpAttribute>]
+    member __.init () = restoreDBs()
+    
+    [<OneTimeTearDownAttribute>]
+    member __.cleanup () = restoreDBs()
+        
+
 
 module QueryBuilders = 
     let FSharp3 = ExtraTopLevelOperators.query
@@ -60,7 +90,8 @@ module ExprUtils =
                 match e1 with
                 | Some e1 -> Expr.PropertySet(tExp e1, pi, tExp e2, tList l)
                 | None -> Expr.PropertySet(pi, tExp e2, tList l)
-            | Patterns.Quote(e1) -> Expr.Quote(tExp e1)
+            | Patterns.QuoteRaw(e1) -> Expr.QuoteRaw(tExp e1)
+            | Patterns.QuoteTyped(e1) -> Expr.QuoteRaw(tExp e1)
             | Patterns.Sequential(e1, e2) -> Expr.Sequential(tExp e1, tExp e2)
             | Patterns.TryFinally(e1, e2) -> Expr.TryFinally(tExp e1, tExp e2)
             | Patterns.TryWith(e1, v1, e2, v2, e3) -> Expr.TryWith(tExp e1, v1, tExp e2, v2, tExp e3)
@@ -151,8 +182,8 @@ type Utils() =
     // Gets the body of an expression of the type "query { <body> }"
     static let extractBodyRaw(e:Expr<'T>) =
         match e with
-        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(Some _, mi, [Patterns.Quote(q)])), _)
-        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(None,   mi, [_; Patterns.Quote(q)])), _) ->
+        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(Some _, mi, [Patterns.QuoteRaw(q)])), _)
+        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(None,   mi, [_; Patterns.QuoteRaw(q)])), _) ->
             q
         | _ ->
             failwith "Unable to find an outermost query expression"

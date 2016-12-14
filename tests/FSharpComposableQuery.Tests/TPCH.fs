@@ -39,26 +39,25 @@ module TPCH =
     let internal db = sql.GetDataContext().Main
 
 
-    [<TestFixture>]
-    type TestClass() =
-        static let customers = db.Customer
-        static let lineitem  = db.Lineitem
-        static let nation    = db.Nation
-        static let orders    = db.Orders
-        static let part      = db.Part
-        static let partsupp  = db.Partsupp
-        static let region    = db.Region
-        static let supplier  = db.Supplier
+
+    let customers = db.Customer
+    let lineitem  = db.Lineitem
+    let nation    = db.Nation
+    let orders    = db.Orders
+    let part      = db.Part
+    let partsupp  = db.Partsupp
+    let region    = db.Region
+    let supplier  = db.Supplier
 
         /// helper: emptiness test
-        static let empty () = <@ fun xs -> not (query {for x in xs do exists (true)}) @>
+    let empty () = <@ fun xs -> not (query {for x in xs do exists (true)}) @>
         /// helper: contains 
-        static let rec contains xs = 
+    let rec contains xs = 
             match xs with 
               [] -> <@ fun x -> false @>
             | y::ys -> <@ fun x -> x = y || (%contains ys) y @> 
 
-        let q1 delta = 
+    let q1 delta = 
           let date = (new System.DateTime(1998,12,01)).AddDays(-delta) in
           query { for l in db.Lineitem do 
                   where (l.LShipDate <= date)
@@ -75,51 +74,50 @@ module TPCH =
 
 
        
-        let avgBalance = 
+    let avgBalance = 
             <@ fun (cs : IQueryable<Customer>) -> 
                 query { for c in cs do 
                         where (c.CAcctBal > decimal(0)) 
                         averageBy (c.CAcctBal)} @> 
-        let sumBalance = <@ fun (g : IGrouping<_,Customer>) ->  
-                           query { for c in g do
-                                   sumBy c.CAcctBal} @>
-        let ordersOf = 
-            <@ fun (c : Customer) ->
-                query { for o in db.Orders do 
-                        where (o.OCustKey = c.CCustKey)
-                        select o } @> 
+   
+    let sumBalance = <@ fun (g : IGrouping<_,Customer>) ->  
+                        query { for c in g do
+                                sumBy c.CAcctBal} @>
+    let ordersOf = 
+        <@ fun (c : Customer) ->
+            query { for o in db.Orders do 
+                    where (o.OCustKey = c.CCustKey)
+                    select o } @> 
            
-        let potentialCustomers = 
-            <@ fun (cs : IQueryable<Customer>) ->
-                query { for c in cs do
-                        where (c.CAcctBal > (%avgBalance) cs && (%empty()) ((%ordersOf) c))  
-                        select c
-                        }  @>  
-        let countryCodeOf = 
-            <@ fun (c : Customer) -> c.CPhone.Substring(0,2) @> 
-        let livesIn countries = 
-            <@ fun (c:Customer) -> (%contains countries) ((%countryCodeOf) c) @>
-        let pots countries = <@ (%potentialCustomers) (query { for c in db.Customer do 
-                                                               where ((%livesIn countries) c)
-                                                               select c}) @>  
+    let potentialCustomers = 
+        <@ fun (cs : IQueryable<Customer>) ->
+            query { for c in cs do
+                    where (c.CAcctBal > (%avgBalance) cs && (%empty()) ((%ordersOf) c))  
+                    select c
+                    }  @>  
+    let countryCodeOf = 
+        <@ fun (c : Customer) -> c.CPhone.Substring(0,2) @> 
+    let livesIn countries = 
+        <@ fun (c:Customer) -> (%contains countries) ((%countryCodeOf) c) @>
+    let pots countries = <@ (%potentialCustomers) (query { for c in db.Customer do 
+                                                            where ((%livesIn countries) c)
+                                                            select c}) @>  
 
-                    // works!
-        let q22 (countries : string list) = 
-            <@ query { 
-                for p in (%pots countries) do 
-                groupBy ((%countryCodeOf) p) into g
-                sortBy (g.Key)
-                select(g.Key, g.Count(), (%sumBalance) g)
-            }@>
-
-
+                // works!
+    let q22 (countries : string list) = 
+        <@ query { 
+            for p in (%pots countries) do 
+            groupBy ((%countryCodeOf) p) into g
+            sortBy (g.Key)
+            select(g.Key, g.Count(), (%sumBalance) g)
+        }@>
 
 
 
 
-        [<TestFixtureSetUp>]
-        member public this.init() = ()
 
+
+    
         
 
 

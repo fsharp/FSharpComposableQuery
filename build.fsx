@@ -50,7 +50,7 @@ let testBuildDir = "./bin/tests"
 
 
 // Pattern specifying assemblies to be tested using MSTest
-let testAssemblies = !! "bin/tests/FSharpComposableQuery*Tests*.exe"
+let testAssemblies = !! "bin/tests/FSharpComposableQuery*Tests*"
 
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted 
@@ -100,8 +100,8 @@ Target "CleanDocs" (fun _ ->
 // Build library
 
 Target "Build" (fun _ ->
-    let props = [("DocumentationFile", project + ".XML")]   //explicitly generate XML documentation
-    MSBuildReleaseExt buildDir props "Rebuild" libraryReferences
+//    let props = [("DocumentationFile", project + ".XML")]   //explicitly generate XML documentation
+    MSBuildRelease buildDir "Rebuild" libraryReferences
     |> Log "Build-Output: "
 )
 
@@ -125,7 +125,8 @@ Target "RunTests" (fun _ ->
             ToolPath = "packages/test/NUnit.ConsoleRunner/tools/nunit3-console.exe"
             ShadowCopy = false
             TimeOut = TimeSpan.FromMinutes 20.
-            OutputDir = "bin/tests/TestResults.xml" })
+//            OutputDir = "bin/tests" 
+        })
 )
 
 // --------------------------------------------------------------------------------------

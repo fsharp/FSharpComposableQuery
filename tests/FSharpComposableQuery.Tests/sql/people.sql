@@ -1,13 +1,13 @@
 DROP TABLE IF EXISTS People;
 CREATE TABLE People (
-    [Name] NVARCHAR (255) NOT NULL,
+    [Name] VARCHAR(255) NOT NULL,
     [Age]   INT           NOT NULL,
     PRIMARY KEY ([Name],[Age] ASC)
 );
 
 DROP TABLE IF EXISTS Couples;
 CREATE TABLE Couples (
-    Her NVARCHAR (255) NOT NULL,
-    Him NVARCHAR (255) NOT NULL,
+    Her VARCHAR(255) NOT NULL,
+    Him VARCHAR(255) NOT NULL,
     PRIMARY KEY (Her,Him ASC)
 );

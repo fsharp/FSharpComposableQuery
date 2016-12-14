@@ -1,14 +1,14 @@
 DROP TABLE IF EXISTS Course;
 CREATE TABLE [Course] (
     [CourseID]   INT           NOT NULL,
-    [CourseName] NVARCHAR (255) NOT NULL,
+    [CourseName] VARCHAR(255) NOT NULL,
     PRIMARY KEY ([CourseID] ASC)
 );
 
 DROP TABLE IF EXISTS Student;
 CREATE TABLE [Student] (
     [StudentID] INT           NOT NULL,
-    [Name]      NVARCHAR (255) NOT NULL,
+    [Name]      VARCHAR(255) NOT NULL,
     [Age]       INT           NULL,
     PRIMARY KEY ([StudentID] ASC)
 );
@@ -26,7 +26,7 @@ CREATE TABLE [CourseSelection] (
 DROP TABLE IF EXISTS LastStudent;
 CREATE TABLE [LastStudent] (
     [StudentID] INT           NOT NULL,
-    [Name]      NVARCHAR (255) NOT NULL,
+    [Name]      VARCHAR(255)  NOT NULL,
     [Age]       INT           NULL,
     PRIMARY KEY ([StudentID] ASC)
 );

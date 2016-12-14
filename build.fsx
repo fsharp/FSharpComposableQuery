@@ -9,6 +9,8 @@ open Fake.AssemblyInfoFile
 open Fake.ReleaseNotesHelper
 open System
 
+
+
 // --------------------------------------------------------------------------------------
 // START TODO: Provide project-specific details below
 // --------------------------------------------------------------------------------------
@@ -88,18 +90,17 @@ Target "CleanDocs" (fun _ ->
     CleanDirs ["docs/output"]
 )
 
-Target "SetupSQLite" (fun _ ->
-    let frameworks = ["net40"; "net45"; "net46";"net451"]
-    frameworks
-    |> List.iter (fun fwrk ->
-        let x86target = sprintf "packages/test/System.Data.SQLite.Core/lib/%s/x86" fwrk
-        let x86source = sprintf "packages/test/System.Data.SQLite.Core/build/%s/x86" fwrk
-        let x64target = sprintf "packages/test/System.Data.SQLite.Core/lib/%s/x64" fwrk
-        let x64source = sprintf "packages/test/System.Data.SQLite.Core/build/%s/x64" fwrk
-        CopyDir x86target x86source (fun _ -> true)
-        CopyDir x64target x64source (fun _ -> true)
-    )
+#r @"packages/test/System.Data.SQLite.Core/lib/net451/System.Data.SQLite.dll"
+open System.Data.SQLite
+Target "ConstructSQLite" (fun _ ->
+
+    ()
+// SQLiteCommand.Execute
+
+
 )
+
+
 
 // --------------------------------------------------------------------------------------
 // Build library
@@ -238,7 +239,6 @@ Target "All" DoNothing
 
 "AssemblyInfo"
     ==> "Build"  
-    ==> "SetupSQLite"
     ==> "BuildTest" 
     ==> "RunTests"
 

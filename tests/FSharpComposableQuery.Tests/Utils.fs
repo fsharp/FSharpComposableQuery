@@ -3,12 +3,10 @@
 open System
 open System.IO
 open System.Linq
-open System.Reflection
 open Microsoft.FSharp.Linq
 open Microsoft.FSharp.Quotations
 open FSharpComposableQuery
 open System.Data.SQLite
-open NUnit
 open NUnit.Framework
 
 [<SetUpFixtureAttribute>]

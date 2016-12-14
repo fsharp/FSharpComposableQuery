@@ -1,11 +1,10 @@
 ﻿namespace FSharpComposableQuery.Tests
 
 open FSharpComposableQuery
-open Microsoft.FSharp.Linq
-open Microsoft.FSharp.Data.TypeProviders
 open NUnit.Framework
-open System.Data.SQLite
 open FSharp.Data.Sql
+open FSharp.Linq
+open System.Linq
 
 /// <summary>
 /// Contains example queries and operations on the Organisation database.
@@ -195,9 +194,9 @@ module Nested =
 
     let expertiseNaive =
         <@ fun u -> query {
-            for d in db.Departments do
+            for d in db.Departments.AsQueryable() do
                 if not (query {
-                    for e in db.Employees do
+                    for e in db.Employees.AsQueryable() do
                         exists (e.Dpt = d.Dpt && not (query {
                             for t in db.Tasks do
                                 exists (e.Emp = t.Emp && t.Tsk = u)
@@ -221,10 +220,10 @@ module Nested =
         } @> |> Utils.Run
 
     let nestedDb = <@ query {
-        for d in db.Departments do yield { 
+        for d in db.Departments.AsEnumerable() do yield { 
             Dpt = d.Dpt
             Employees = query {
-                for e in db.Employees do
+                for e in db.Employees.AsQueryable() do
                     if d.Dpt = e.Dpt then yield { 
                         Emp   = e.Emp
                         Tasks = query {

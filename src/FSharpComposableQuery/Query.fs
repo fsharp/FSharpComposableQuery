@@ -4,7 +4,7 @@ module internal Helpers =
     open Microsoft.FSharp.Quotations
     open FSharpComposableQuery.Common
 
-    let IQueryableTy = typeof<System.Linq.IQueryable>
+    let IQueryableTy  = typeof<System.Linq.IQueryable>
     let IEnumerableTy = typeof<System.Collections.IEnumerable>
     
     let IQueryableTTy (ty:System.Type) = typeof<System.Linq.IQueryable<_>>.MakeGenericType(ty)
@@ -14,9 +14,8 @@ module internal Helpers =
     let IGroupingTy (ty1:System.Type,ty2) = typedefof<System.Linq.IGrouping<_,_>>.MakeGenericType(ty1, ty2)
       
     
-    let (|IQueryableTy|_|) ty = if (ty = typeof<System.Linq.IQueryable>) then Some () else None
+    let (|IQueryableTy|_|)  ty = if (ty = typeof<System.Linq.IQueryable>) then Some () else None
     let (|IEnumerableTy|_|) ty = if (ty = typeof<System.Collections.IEnumerable>) then Some () else None
-    
     let (|IQueryableTTy|_|) ty = if (ty = typedefof<System.Linq.IQueryable<_>>) then Some () else None
     let (|SeqTy|_|) (ty:System.Type) = 
         if ty.IsGenericType && ty.GetGenericTypeDefinition() = typedefof<seq<_>>
@@ -208,7 +207,7 @@ module QueryImpl =
             | Tuple(tty, es) -> Tuple(tty, List.map reduce es)
             | Proj(e, i) -> 
                 match reduce e with
-                | Tuple(_tty, es) -> List.nth es i
+                | Tuple(_tty, es) -> List.item i es 
                 | IfThenElse(m, n1, n2) -> 
                     reduce (IfThenElse(m, Proj(n1, i), Proj(n2, i)))
                 | n -> Proj(n, i)
@@ -220,7 +219,7 @@ module QueryImpl =
                     match (getType e1,getType e2) with
                     | QuerySourceTy(ty, IQueryableTy),QuerySourceTy(_ty, IQueryableTy) -> 
                         reduceIfThenElseSeq n (reduce e1) (reduce e2) ty
-                    | QuerySourceTy(ty, _),QuerySourceTy(_ty, _) -> 
+                    | QuerySourceTy(_,_),QuerySourceTy(_,_) -> 
                         failwith "Expected QuerySourceTy(_,IQueryableTy) in both branches of If"
                     | _ -> IfThenElse(n, reduce e1, reduce e2)
             | Record(rty, r) -> Record(rty, List.map (fun (l, e) -> (l, reduce e)) r)
@@ -295,20 +294,20 @@ module QueryImpl =
                 nf expNorm
              
         // MethodInfo data
-        let yieldMi = getGenericMethodInfo <@ fun (q:QueryBuilder) -> q.Yield @>
-        let yieldFromMi = getGenericMethodInfo <@ fun (q:QueryBuilder) -> q.YieldFrom @>
-        let baseRunQueryAsValueMi = getGenericMethodInfo <@ fun (q:Microsoft.FSharp.Linq.QueryBuilder) (e:Expr<bool>) -> q.Run e @>
-        let baseRunQueryAsEnumMi =  getGenericMethodInfo <@ fun (q:Microsoft.FSharp.Linq.QueryBuilder) (e : Expr<QuerySource<_, System.Collections.IEnumerable>>) -> q.Run e @>
-        let baseRunQueryAsQueryableMi =  getGenericMethodInfo <@ fun (q:Microsoft.FSharp.Linq.QueryBuilder) (e : Expr<QuerySource<_, System.Linq.IQueryable>>) -> q.Run e @>
+        let yieldMi                   = getGenericMethodInfo <@ fun (q:QueryBuilder) -> q.Yield @>
+        let yieldFromMi               = getGenericMethodInfo <@ fun (q:QueryBuilder) -> q.YieldFrom @>
+        let baseRunQueryAsValueMi     = getGenericMethodInfo <@ fun (q:Microsoft.FSharp.Linq.QueryBuilder) (e:Expr<bool>) -> q.Run e @>
+        let baseRunQueryAsEnumMi      = getGenericMethodInfo <@ fun (q:Microsoft.FSharp.Linq.QueryBuilder) (e : Expr<QuerySource<_, System.Collections.IEnumerable>>) -> q.Run e @>
+        let baseRunQueryAsQueryableMi = getGenericMethodInfo <@ fun (q:Microsoft.FSharp.Linq.QueryBuilder) (e : Expr<QuerySource<_, System.Linq.IQueryable>>) -> q.Run e @>
 
-        let zeroMi = getGenericMethodInfo <@ fun (q:QueryBuilder) -> q.Zero @>
-        let forMi = getGenericMethodInfo <@ fun (q:QueryBuilder) -> q.For @>
-        let whereMi = getGenericMethodInfo  <@ fun (q:QueryBuilder) -> q.Where @>
-        let selectMi = getGenericMethodInfo <@ fun (q:QueryBuilder) -> q.Select @>
-        let unionQueryMi = getGenericMethodInfo <@ fun (qa : IQueryable<_>) (qb : IQueryable<_>) -> Queryable.Union(qa, qb) @>
-        let unionEnumMi = getGenericMethodInfo <@ fun (qa : seq<_>) (qb : seq<_>) -> System.Linq.Enumerable.Union(qa, qb) @>
+        let zeroMi        = getGenericMethodInfo <@ fun (q:QueryBuilder) -> q.Zero @>
+        let forMi         = getGenericMethodInfo <@ fun (q:QueryBuilder) -> q.For @>
+        let whereMi       = getGenericMethodInfo  <@ fun (q:QueryBuilder) -> q.Where @>
+        let selectMi      = getGenericMethodInfo <@ fun (q:QueryBuilder) -> q.Select @>
+        let unionQueryMi  = getGenericMethodInfo <@ fun (qa : IQueryable<_>) (qb : IQueryable<_>) -> Queryable.Union(qa, qb) @>
+        let unionEnumMi   = getGenericMethodInfo <@ fun (qa : seq<_>) (qb : seq<_>) -> System.Linq.Enumerable.Union(qa, qb) @>
         let sourceQueryMi = getGenericMethodInfo <@ fun (q:QueryBuilder) (l:IQueryable<_>) -> q.Source(l) @>
-        let sourceEnumMi = getGenericMethodInfo <@ fun (q:QueryBuilder) (l:seq<_>) -> q.Source(l) @>
+        let sourceEnumMi  = getGenericMethodInfo <@ fun (q:QueryBuilder) (l:seq<_>) -> q.Source(l) @>
 
         let recognizeFunc (methodInfo':MethodInfo) = 
             let methodInfo = getGenericMethodDefinition methodInfo' 
@@ -636,13 +635,13 @@ open FSharpComposableQuery.Common
 [<AutoOpen>]
 module LowPriority = 
     type QueryImpl.QueryBuilder with
-        [<CompiledName("RunQueryAsValue")>]
+        [<CompiledName "RunQueryAsValue">]
         member this.Run q = this.RunAsValue q
 
 [<AutoOpen>]
 module HighPriority = 
     type QueryImpl.QueryBuilder with
-        [<CompiledName("RunQueryAsEnumerable")>]
+        [<CompiledName "RunQueryAsEnumerable">]
         member this.Run q = this.RunAsEnumerable q
 
 [<AutoOpen>]
@@ -653,7 +652,7 @@ module TopLevelValues =
         {
             new ForwardDeclarations.IRunQuery with
                 member this.Value = getGenericMethodInfo <@ fun (q:QueryImpl.QueryBuilder) (e:Expr<bool>) -> q.Run e @>
-                member this.Enum = getGenericMethodInfo <@ fun (q:QueryImpl.QueryBuilder) (e : Expr<QuerySource<_, System.Collections.IEnumerable>>) -> q.Run e @>
+                member this.Enum  = getGenericMethodInfo <@ fun (q:QueryImpl.QueryBuilder) (e : Expr<QuerySource<_, System.Collections.IEnumerable>>) -> q.Run e @>
                 member this.Query = getGenericMethodInfo <@ fun (q:QueryImpl.QueryBuilder) (e : Expr<QuerySource<_, System.Linq.IQueryable>>) -> q.Run e @>
         }
 

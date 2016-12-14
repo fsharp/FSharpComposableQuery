@@ -90,17 +90,6 @@ Target "CleanDocs" (fun _ ->
     CleanDirs ["docs/output"]
 )
 
-#r @"packages/test/System.Data.SQLite.Core/lib/net451/System.Data.SQLite.dll"
-open System.Data.SQLite
-Target "ConstructSQLite" (fun _ ->
-
-    ()
-// SQLiteCommand.Execute
-
-
-)
-
-
 
 // --------------------------------------------------------------------------------------
 // Build library
@@ -194,18 +183,19 @@ open System.Data
 open System.Data.SQLite
 
 Target "DbSetup" (fun _ ->
-   let scriptsDir = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "tests/FSharpComposableQuery.Tests/sql")
-   for f in System.IO.Directory.EnumerateFiles(scriptsDir) do
-       let dbname = System.IO.Path.GetFileNameWithoutExtension(f)
-       use conn = new SQLiteConnection(sprintf "DataSource=%s.db" dbname)
-       conn.Open()
-       printfn "Creating db: %s" dbname
-       let scriptTxt = ReadFileAsString f
-       use cmd = conn.CreateCommand()
-       cmd.CommandText <- scriptTxt
-       use rdr = cmd.ExecuteReader()
-       ()
-   printfn "Finished!"
+    ensureDirectory "tests/databases"
+    let scriptsDir = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "tests/FSharpComposableQuery.Tests/sql")
+    for f in System.IO.Directory.EnumerateFiles(scriptsDir) do
+        let dbname = System.IO.Path.GetFileNameWithoutExtension(f)
+        use conn = new SQLiteConnection(sprintf "DataSource=tests/databases/%s.db" dbname)
+        conn.Open()
+        printfn "Creating db: %s" dbname
+        let scriptTxt = ReadFileAsString f
+        use cmd = conn.CreateCommand()
+        cmd.CommandText <- scriptTxt
+        use rdr = cmd.ExecuteReader()
+        ()
+    printfn "Finished!"
 )
 
 Target "Release" DoNothing
@@ -221,6 +211,7 @@ Target "All" DoNothing
 
 "AssemblyInfo"
     ==> "Build"  
+    ==> "DbSetup"
     ==> "BuildTest" 
     ==> "RunTests"
 

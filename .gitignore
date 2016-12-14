@@ -3,7 +3,7 @@
 
 /.fake/
 /.paket/paket.exe
-
+/tests/databases/
 # User-specific files
 *.suo
 *.user

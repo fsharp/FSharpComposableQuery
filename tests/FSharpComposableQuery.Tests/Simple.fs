@@ -2,7 +2,6 @@
 
 open System
 open System.Linq
-open Microsoft.FSharp.Data.TypeProviders
 open Microsoft.FSharp.Linq
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
@@ -23,18 +22,19 @@ module Simple =
     
 //    type internal schema = SqlDataConnection<ConnectionStringName="QueryConnectionString", ConfigFile=dbConfigPath>
 
-    let [<Literal>] connectionString = "QueryConnectionString"
-    let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net451"
+    let [<Literal>] connectionString = "DataSource=" + __SOURCE_DIRECTORY__ + @"../databases/simple.db;" + "Version=3;foreign keys = true"
+    let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net46"
     type sql = SqlDataProvider<
-                Common.DatabaseProviderTypes.SQLITE, 
-                SQLiteLibrary = Common.SQLiteLibrary.SystemDataSQLite,
-                ConnectionString = connectionString, 
-                ResolutionPath = resolutionPath,                 
-                CaseSensitivityChange = Common.CaseSensitivityChange.ORIGINAL>
+                Common.DatabaseProviderTypes.SQLITE
+            ,   SQLiteLibrary = Common.SQLiteLibrary.SystemDataSQLite
+            ,   ConnectionString = connectionString
+            ,   ResolutionPath = resolutionPath
+            ,   CaseSensitivityChange = Common.CaseSensitivityChange.ORIGINAL
+            >
     [<TestFixture>]
     type TestClass() = 
 
-        let db = schema.GetDataContext()
+        let db = sql.GetDataContext()
 
         let data = [1; 5; 7; 11; 18; 21]
 

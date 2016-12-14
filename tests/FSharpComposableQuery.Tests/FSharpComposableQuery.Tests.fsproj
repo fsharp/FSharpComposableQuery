@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>FSharpComposableQuery.Tests</RootNamespace>
     <AssemblyName>FSharpComposableQuery.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <Name>FSharpComposableQuery.Tests</Name>
     <TargetFrameworkProfile />
@@ -259,16 +259,6 @@
       <ItemGroup>
         <Reference Include="System.Data.SQLite">
           <HintPath>..\..\packages\test\System.Data.SQLite.Core\lib\net46\System.Data.SQLite.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-        <Reference Include="SQLite.Interop">
-          <HintPath>..\..\packages\test\System.Data.SQLite.Core\lib\net46\x64\SQLite.Interop.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-        <Reference Include="SQLite.Interop">
-          <HintPath>..\..\packages\test\System.Data.SQLite.Core\lib\net46\x86\SQLite.Interop.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>

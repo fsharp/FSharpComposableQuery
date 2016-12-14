@@ -24,52 +24,37 @@ module Nested =
             ,   CaseSensitivityChange = Common.CaseSensitivityChange.ORIGINAL  
             >
 
- 
-
-    let internal context = sql.GetDataContext()
-    let internal db = context.Main
-
-    // Schema declarations
-    type internal Department = sql.dataContext.``main.DepartmentsEntity``
-
-
+    let context = sql.GetDataContext ()
+    let db = context.Main
 
     // TypeProvider type abbreviations. 
-    type internal Employee = sql.dataContext.``main.EmployeesEntity``
-
-    type internal Contact = sql.dataContext.``main.ContactsEntity``
-
-    type internal Task = sql.dataContext.``main.TasksEntity``
+    type Department = sql.dataContext.``main.DepartmentsEntity``
+    type Employee   = sql.dataContext.``main.EmployeesEntity``
+    type Contact    = sql.dataContext.``main.ContactsEntity``
+    type Task       = sql.dataContext.``main.TasksEntity``
     
     //Nested type declarations
-    type EmployeeTasks =
-        { emp : string
-          tasks : System.Linq.IQueryable<string> }
+    type EmployeeTasks = { 
+        Emp : string
+        Tasks : System.Linq.IQueryable<string> 
+    }
 
-    type DepartmentEmployees =
-        { dpt : string
-          employees : System.Linq.IQueryable<EmployeeTasks> }
+    type DepartmentEmployees = { 
+        Dpt : string
+        Employees : System.Linq.IQueryable<EmployeeTasks> 
+    }
 
     type NestedOrg = System.Linq.IQueryable<DepartmentEmployees>
 
-    
-
-
-
-    [<Literal>]
-    let N_DEPARTMENTS = 40
-
-    [<Literal>]
-    let N_EMPLOYEES = 5000
-
-    [<Literal>]
-    let N_ABSTRACTION = 500
+    let [<Literal>] N_DEPARTMENTS = 40
+    let [<Literal>] N_EMPLOYEES   = 5000
+    let [<Literal>] N_ABSTRACTION = 500
 
     //db tables
     let departments = db.Departments
-    let employees = db.Employees
-    let contacts = db.Contacts
-    let tasks = db.Tasks
+    let employees   = db.Employees
+    let contacts    = db.Contacts
+    let tasks       = db.Tasks
 
     // random data generator
     let rand = new System.Random()
@@ -98,7 +83,15 @@ module Nested =
     /// <summary>
     /// Generates n uniquely named employees and distributes them uniformly across the given departments. 
     /// </summary>
-    let randomEmployees n depts = List.map (fun _ -> employees.Create(Emp = randomName(), Dpt = randomArray depts)) [ 1..n ]
+    let randomEmployees n depts = 
+        [ 1 .. n ]
+        |> List.map (fun _ -> 
+            employees.Create
+                (   rand.Next(10000,60000) (* salary *)
+                ,   Emp = randomName()
+                ,   Dpt = randomArray depts
+            )
+        ) 
 
     /// <summary>
     /// Generates n uniquely named employees in each of the given departments. 
@@ -118,7 +111,7 @@ module Nested =
             let contact = contacts.Create()
             contact.Dpt <- randomArray depts
             contact.Contact <- randomName()
-            contact.Client <- rand.Next(2)
+            contact.Client <- rand.Next 2
             contact
         )
 
@@ -128,44 +121,11 @@ module Nested =
     let randomTasks emps =
         emps
         |> List.map (fun (r : Employee) ->
-                            List.map (fun _ -> tasks.Create(Emp = r.Emp, Tsk = randomTask())) [ 1..rand.Next(3) ])
+            List.map (fun _ -> 
+                tasks.Create(Emp = r.Emp, Tsk = randomTask())) [1 .. rand.Next 3])
         |> List.concat
 
-
-    //database records update functions
-//        let addContact (r : Contact) = contacts.InsertOnSubmit(r)
-
-//        let addDept (dpt : string) = departments.InsertOnSubmit(new Department(Dpt = dpt))
-
-//        let addEmployee (r : Employee) = employees.InsertOnSubmit(r)
-        
-//        let addTask (r : Task) = tasks.InsertOnSubmit(r)
-
-    // Clears all relevant tables in the database.
-    let dropTables() =
-        use conn = new SQLiteConnection(sprintf "DataSource=%s." dbpath)
-        conn.Open()
-        let sqlcmd cmdtxt = 
-            use cmd = new SQLiteCommand(cmdtxt,conn)
-            cmd.ExecuteNonQuery()|>ignore               
-//            sqlcmd "DROP TABLE [organisation].[employees]"
-//            sqlcmd "DROP TABLE [organisation].[tasks]"
-//            sqlcmd "DROP TABLE [organisation].[departments]"
-//            sqlcmd "DROP TABLE [organisation].[contacts]"
-        sqlcmd "delete from [employees]"
-        sqlcmd "delete from [tasks]"
-        sqlcmd "delete from [departments]"
-        sqlcmd "delete from [contacts]"
-        conn.Close()
-        context.SubmitUpdates()
-    
-
-//            context.
-//            ignore (db.DataContext.ExecuteCommand("TRUNCATE TABLE [FCQ-Org].[dbo].[employees]"))
-//            ignore (db.DataContext.ExecuteCommand("TRUNCATE TABLE [FCQ-Org].[dbo].[tasks]"))
-//            ignore (db.DataContext.ExecuteCommand("TRUNCATE TABLE [FCQ-Org].[dbo].[departments]"))
-//            ignore (db.DataContext.ExecuteCommand("TRUNCATE TABLE [FCQ-Org].[dbo].[contacts]"))
-            
+           
     /// <summary>
     /// Creates a number of random departments and uniformly distributes the specified number of employees across them, 
     /// then updates the database with the new rows. 
@@ -174,28 +134,11 @@ module Nested =
     /// <param name="nEmp">The total number of employees to generate. </param>
     let addRandom nDep nEmp =
         let depts = Array.map (ignore >> randomDepartment) [| 1..nDep |]
-//            Array.iter addDept depts
-        context.SubmitUpdates()
-
-//            db.DataContext.SubmitChanges()
-
         let employees = randomEmployees nEmp depts
-//            List.iter addEmployee employees
-        context.SubmitUpdates()
-
-//            db.DataContext.SubmitChanges()
-
         let contacts = randomContacts nEmp depts
-//            List.iter addContact contacts
-        context.SubmitUpdates()
-
-//            db.DataContext.SubmitChanges()
-            
         let tasks = randomTasks employees
-//            List.iter addTask tasks
         context.SubmitUpdates()
 
-//            db.DataContext.SubmitChanges()
 
     /// <summary>
     /// Creates a number of random departments and in each of them generates the specified number of employees,
@@ -205,29 +148,11 @@ module Nested =
     /// <param name="nEmp">The number of employees to generate in each department. </param>
     let addRandomForEach nDep nEmp =
         let depts = Array.map (ignore >> randomDepartment) [| 1..nDep |]
-//            Array.iter addDept depts
-        context.SubmitUpdates()
-
-//            db.DataContext.SubmitChanges()
-
-        // for each department generate n employees
         let employees = randomEmployeesInEach nEmp depts
-//            List.iter addEmployee employees
-        context.SubmitUpdates()
-
-//            db.DataContext.SubmitChanges()
-
         let contacts = randomContacts nEmp depts
-//            List.iter addContact contacts
-        context.SubmitUpdates()
-
-//            db.DataContext.SubmitChanges()
-
         let tasks = randomTasks employees
-//            List.iter addTask tasks
         context.SubmitUpdates()
 
-//            db.DataContext.SubmitChanges()
             
     /// <summary>
     /// Creates a department named 'Abstraction' and generates a specified number of employees in it,
@@ -237,128 +162,101 @@ module Nested =
     /// <param name="nEmp">The number of employees to generate in the 'Abstraction' department. </param>
     let addAbstractionDept nEmp =
         departments.Create(Dpt="Abstraction")|>ignore
-//            addDept "Abstraction"
-        context.SubmitUpdates()
-
-//            db.DataContext.SubmitChanges()
-
         let employees = randomEmployees nEmp [| "Abstraction" |]
-//            List.iter addEmployee employees
-//            db.DataContext.SubmitChanges()
-        context.SubmitUpdates()
-
         let tasks = randomTasks employees
-//            List.iter addTask tasks
         employees
         |> List.iter (fun (e : Employee) ->
-//                addTask (new Task(Emp = e.Emp, Tsk = "abstract"))) employees
             db.Tasks.Create(Emp = e.Emp, Tsk = "abstract")|>ignore) 
-//            db.DataContext.SubmitChanges()
         context.SubmitUpdates()
 
-
-    (*
-    Example 8 and 9 demonstrate the benefit of using intermediate nested structures. 
-    Each of them evaluates to the same query but the way we formulate them is inherently different. 
-
-    "List all departments where every employee can perform a given task t"
-    *)
-
-    // Example 8
-
-    let expertiseNaive =
-        <@ fun u ->
-            query {
-                for d in db.Departments do
-                    if not (query {
-                        for e in db.Employees do
-                            exists (e.Dpt = d.Dpt && not (query {
-                                for t in db.Tasks do
-                                    exists (e.Emp = t.Emp && t.Tsk = u)
-                            }))
-                    })
-                    then yield d
-            } @>
-
-    let ex8 = <@ query { yield! (%expertiseNaive) "abstract" } @>
-
-
-    // Example 9
-
-    let nestedDb =
-        <@ query {
-            for d in db.Departments do
-                yield { 
-                    dpt = d.Dpt
-                    employees = query {
-                            for e in db.Employees do
-                                if d.Dpt = e.Dpt then
-                                    yield { 
-                                        emp = e.Emp
-                                        tasks = query {
-                                            for t in db.Tasks do
-                                                if t.Emp = e.Emp then yield t.Tsk
-                                        } 
-                                    }
-                    } 
-                }
-        } @>
-
-    let any() =
-        <@ fun xs p ->
-            query {
-                for x in xs do
-                    exists (p x)
-            } @>
-                
-
-    (* There are a number of ways to write each of the following queries *)
-
-    let forallA() = <@ fun xs p -> not ((%any()) xs (fun x -> not(p x))) @>
-
-    let forallB() = <@ fun xs p -> query { for x in xs do all(p x) } @>
-        
-
-    let containsA() = <@ fun xs u -> (%any()) xs (fun x -> x = u) @>
-
-    let containsB() = <@ fun xs u -> not ((%forallA()) xs (fun x -> x <> u)) @>
-
-    let containsC() = <@ fun xs u -> query { for x in xs do contains u } @>
-        
-
-    let expertise =
-        <@ fun u ->
-            query {
-                for d in (%nestedDb) do
-                    if (%forallA()) (d.employees) (fun e -> (%containsA()) e.tasks u) then yield d.dpt
-            } @>
-
-    let ex9 = <@ query { yield! (%expertise) "abstract" } @>
 
     [<OneTimeSetUp>]
     let init() =
         printf
             "Nested: Adding %d departments, %d employees and additional %d people in the Abstraction department... "
             N_DEPARTMENTS N_EMPLOYEES N_ABSTRACTION
-//            dropTables()
         addRandom N_DEPARTMENTS N_EMPLOYEES
         addAbstractionDept N_ABSTRACTION
         printfn "done!"
-            
+
+    let any () =
+        <@ fun xs p -> query {
+                for x in xs do exists (p x)
+        } @>
+                
+
+    (* There are a number of ways to write each of the following queries *)
+
+    let forallA ()   = <@ fun xs p -> not ((%any()) xs (fun x -> not(p x))) @>
+    let forallB ()   = <@ fun xs p -> query { for x in xs do all(p x) } @>
+    let containsA () = <@ fun xs u -> (%any()) xs (fun x -> x = u) @>
+    let containsB () = <@ fun xs u -> not ((%forallA()) xs (fun x -> x <> u)) @>
+    let containsC () = <@ fun xs u -> query { for x in xs do contains u } @>
+
+    let expertiseNaive =
+        <@ fun u -> query {
+            for d in db.Departments do
+                if not (query {
+                    for e in db.Employees do
+                        exists (e.Dpt = d.Dpt && not (query {
+                            for t in db.Tasks do
+                                exists (e.Emp = t.Emp && t.Tsk = u)
+                        }))
+                })
+                then yield d
+        } @>
+
+(*
+    Example 8 and 9 demonstrate the benefit of using intermediate nested structures. 
+    Each of them evaluates to the same query but the way we formulate them is inherently different. 
+
+    "List all departments where every employee can perform a given task t"
+*)
+
+
+    [<Test>]
+    let test01() =
+        <@ query { 
+            yield! (%expertiseNaive) "abstract" 
+        } @> |> Utils.Run
+
+    let nestedDb = <@ query {
+        for d in db.Departments do yield { 
+            Dpt = d.Dpt
+            Employees = query {
+                for e in db.Employees do
+                    if d.Dpt = e.Dpt then yield { 
+                        Emp   = e.Emp
+                        Tasks = query {
+                            for t in db.Tasks do
+                                if t.Emp = e.Emp then yield t.Tsk
+                        } 
+                    }
+            } 
+        }
+    } @>
+
+    let expertise =
+        <@ fun u -> query {
+            for d in (%nestedDb) do
+                if (%forallA()) (d.Employees) (fun e -> (%containsA()) e.Tasks u) then yield d.Dpt
+        } @>
+
     // This query evaluates, but it lazily constructs the result
     // by stitching SQL queries: one for every department and employee. 
     // Thus accessing even parts of the data is done by executing 
     // multiple queries instead of, possibly, one.  
     let test00() =
-        let z = query { yield! (%nestedDb) }
-        ()
+        query { 
+            yield! (%nestedDb) 
+        } |> ignore
+        
 
-    [<Test>]
-    let test01() =
-        printfn "%s" "ex8"
-        Utils.Run ex8
+    // Example 9
+
 
     [<Test>]
     let test02() =
-        printfn "%s" "ex9"
-        Utils.Run ex9
+        <@ query { 
+            yield! (%expertise) "abstract" } 
+        @> |> Utils.Run 

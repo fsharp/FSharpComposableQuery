@@ -12,8 +12,12 @@ open NUnit
 open NUnit.Framework
 
 [<SetUpFixtureAttribute>]
-type Init() =
-    
+type Init () =
+    (* 
+        Creates new databases with a fresh state based on the sql scripts
+        Runs before tests to clear detritus that may be created while working with the sqlprovider
+        Runs after tests to put the databases back in a state where they'll be usable in editor by the sqlprovider
+    *)
     let restoreDBs () =
         printfn "Restoring DBs to initial state"
         for f in Directory.EnumerateFiles (__SOURCE_DIRECTORY__ + "../../sql" ) do

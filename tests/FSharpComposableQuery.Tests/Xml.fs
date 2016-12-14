@@ -86,11 +86,11 @@ module Xml =
         /// <param name="path2">The path filter. </param>
         static member (^^) (path1, path2) = Seq(path1, Filter(path2))
 
-    let internal context = sql.GetDataContext()
-    let internal db = context.Main
-    let internal data = db.Data
-    let internal text = db.Text
-    let internal attributes = db.Attribute
+    let context = sql.GetDataContext()
+    let db = context.Main
+    let data = db.Data
+    let text = db.Text
+    let attributes = db.Attribute
 
     // XML document loading/shredding
 
@@ -108,57 +108,41 @@ module Xml =
             a.Element <- parent
             a.Name <- att.Name.LocalName
             a.Value <- att.Value
-            context.SubmitUpdates()
-//            attributes. InsertOnSubmit(a)
 
         // recursively traverse all child nodes
         let traverseChildren entry parent i (xmls) = 
             Seq.fold (traverseXml entry parent) i xmls
+        let result =
+            match node with
+            | :? XElement as xml ->
+                let id = new_id()
+                let j = Seq.iter (traverseAttribute entry id) (xml.Attributes())
+                let j = traverseChildren entry id (i + 1) (xml.Nodes())
+                let d = db.Data.Create()
+                d.Name <- xml.Name.ToString()
+                d.Id <- id
+                d.Entry <- entry
+                d.Pre <- i
+                d.Post <- j
+                d.Parent <- parent
+                j + 1
+            | :? XText as xtext ->
+                let id = new_id()
+                let d = db.Data.Create()
+                d.Name <- "#text"
+                d.Id <- id
+                d.Entry <- entry
+                d.Pre <- i
+                d.Post <- i
+                d.Parent <- parent
+                let t = db.Text.Create()
+                t.Id <- id
+                t.Value <- xtext.Value
+                i + 1
+            | _ -> i
+        context.SubmitUpdates()
+        result
 
-        match node with
-        | :? XElement as xml ->
-            let id = new_id()
-            let j = Seq.iter (traverseAttribute entry id) (xml.Attributes())
-            let j = traverseChildren entry id (i + 1) (xml.Nodes())
-
-            let d = db.Data.Create()
-            d.Name <- xml.Name.ToString()
-            d.Id <- id
-            d.Entry <- entry
-            d.Pre <- i
-            d.Post <- j
-            d.Parent <- parent
-            context.SubmitUpdates()
-
-//            data.InsertOnSubmit(d)
-
-//            data.Context.SubmitChanges()
-            j + 1
-        | :? XText as xtext ->
-            let id = new_id()
-
-            let d = db.Data.Create()
-            d.Name <- "#text"
-            d.Id <- id
-            d.Entry <- entry
-            d.Pre <- i
-            d.Post <- i
-            d.Parent <- parent
-            context.SubmitUpdates()
-
-//            data.InsertOnSubmit(d)
-
-            let t = db.Text.Create()
-            t.Id <- id
-            t.Value <- xtext.Value
-            context.SubmitUpdates()
-
-//            text.InsertOnSubmit(t)
-
-//            data.Context.SubmitChanges()
-            i + 1
-        | _ -> i
-        
     /// <summary>
     /// Parses the given file as an Xml document, and then inserts its contents in the database. 
     /// </summary>
@@ -187,26 +171,9 @@ module Xml =
         insertXml entry xml
 
     /// <summary>
-    /// Clears all relevant tables in the database. 
-    /// </summary>
-    let dropTables() =
-        use conn = new SQLiteConnection(sprintf "DataSource=%s." dbpath)
-        conn.Open()
-        let sqlcmd cmdtxt = 
-            use cmd = new SQLiteCommand(cmdtxt,conn)
-            cmd.ExecuteNonQuery()|>ignore
-        sqlcmd "DROP TABLE [xml].[dbo].[Attribute]"
-        sqlcmd "DROP TABLE [xml].[dbo].[Text]"
-        sqlcmd "DROP TABLE [xml].[dbo].[Data]"
-        conn.Close()
-
-
-    /// <summary>
     /// Loads the basicXml file
     /// </summary>
-    let loadBasicXml() =
-//        dropTables()
-        insertXml 0 basicXml
+    let loadBasicXml() = insertXml 0 basicXml
 
     /// <summary>
     /// Returns an expression testing whether two rows match the specified axis predicate. 
@@ -266,8 +233,6 @@ module Xml =
                        if (root.Parent = -1 && root.Entry = rootId) then yield row'.Id
            } @>
 
-
-
     let xp0 = Path.Child / Path.Child                                                       //  /*/*
     let xp1 = Path.Descendant / Path.Parent                                                 //  //*/parent::*
     let xp2 = Path.Descendant / (Filter(Path.FollowingSibling % "dirn"))                    //  //*[following-sibling::d]
@@ -277,34 +242,21 @@ module Xml =
     [<OneTimeSetUp>]
     let init() =
         printf "Xml: Parsing file %A... " xmlPath
-        dropTables()
         loadXml 0 xmlPath
         printfn "done!"
 
     [<Test>]
     let test01() =
-        printfn "%s" "xp0"
-        xp0
-        |> xpath 0 <@ data @>
-        |> Utils.Run
+        xp0 |> xpath 0 <@ data @>  |> Utils.Run
 
     [<Test>]
     let test02() =
-        printfn "%s" "xp1"
-        xp1
-        |> xpath 0 <@ data @>
-        |> Utils.Run
+        xp1 |> xpath 0 <@ data @> |> Utils.Run
 
     [<Test>]
     let test03() =
-        printfn "%s" "xp2"
-        xp2
-        |> xpath 0 <@ data @>
-        |> Utils.Run
+        xp2 |> xpath 0 <@ data @> |> Utils.Run
 
     [<Test>]
     let test04() =
-        printfn "%s" "xp3"
-        xp3
-        |> xpath 0 <@ data @>
-        |> Utils.Run
+        xp3 |> xpath 0 <@ data @> |> Utils.Run

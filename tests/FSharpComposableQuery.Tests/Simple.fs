@@ -44,139 +44,113 @@ module Simple =
     [<Test>]
     let ``contains query operator``() = 
         tag "contains query operator"
-        let q =
-            <@ query {
-                for student in db.Student do
-                select student.Age
-                contains 11
-                } @>
-        Utils.Run q
+        <@ query {
+            for student in db.Student do
+            select student.Age
+            contains 11
+        } @> |> Utils.Run
 
 
     [<Test>]
     let ``count query operator``() = 
         tag "count query operator"
-        let q =
-            <@ query {
-                for student in db.Student do
-                select student
-                count
-                } @>
-        Utils.Run q
+        <@ query {
+            for student in db.Student do
+            select student
+            count
+        } @> |> Utils.Run
 
 
 
     [<Test>]
     let ``last query operator.``() = 
         tag "last query operator." 
-        let q =
-            <@ query {
-                for s in data do
-                sortBy s
-                last
-                } @>
-        Utils.Run q
+        <@ query {
+            for s in data do
+            sortBy s
+            last
+        } @> |> Utils.Run
 
 
     [<Test>]
     let ``lastOrDefault query operator.``() = 
         tag "lastOrDefault query operator." 
-        let q =
-            <@ query {
-                    for number in data do
-                    sortBy number
-                    lastOrDefault
-                    } @>
-        Utils.Run q
-
+        <@ query {
+            for number in data do
+            sortBy number
+            lastOrDefault
+        } @> |> Utils.Run
 
 
     [<Test>]
     let ``exactlyOne query operator.``() = 
         tag "exactlyOne query operator."
-        let q =
-            <@ query {
-                for student in db.Student do
-                where (student.StudentId = 1)
-                select student
-                exactlyOne
-                } @>
-        Utils.Run q
-
+        <@ query {
+            for student in db.Student do
+            where (student.StudentId = 1)
+            select student
+            exactlyOne
+        } @> |> Utils.Run
 
 
     [<Test>]
     let ``exactlyOneOrDefault query operator.``() = 
         tag "exactlyOneOrDefault query operator."
-        let q =
-            <@ query {
-                for student in db.Student do
-                where (student.StudentId = 1)
-                select student
-                exactlyOneOrDefault
-                } @>
-        Utils.Run q
-
+        <@ query {
+            for student in db.Student do
+            where (student.StudentId = 1)
+            select student
+            exactlyOneOrDefault
+        } @> |> Utils.Run
 
 
     [<Test>]
     let ``headOrDefault query operator.``() = 
         tag "headOrDefault query operator."
-        let q =
-            <@ query {
-                for student in db.Student do
-                select student
-                headOrDefault
-                } @>
-        Utils.Run q
-
+        <@ query {
+            for student in db.Student do
+            select student
+            headOrDefault
+        } @> |> Utils.Run
 
 
     [<Test>]
     let ``select query operator.``() = 
         tag "select query operator."
-        let q =
-            <@ query {
+        <@ query {
                 for (student) in db.Student do
                 select student
-                } @>
-        Utils.Run q
+        } @> |> Utils.Run
 
 
 
     [<Test>]
     let ``where query operator.``() = 
         tag "where query operator."
-        let q =
-            <@ query {
+        <@ query {
                 for student in db.Student do
                 where (student.StudentId > 4)
                 select student
-                } @>
-        Utils.Run q
+        } @> |> Utils.Run
 
 
     [<Test>]
     let ``minBy query operator.``() = 
         tag "minBy query operator."
-        let q =
-            <@ query {
-                for student in db.Student do
-                minBy student.StudentId
-            } @>
-        Utils.Run q
+        <@ query {
+            for student in db.Student do
+            minBy student.StudentId
+        } @> |> Utils.Run
 
 
 
     [<Test>]
     let ``maxBy query operator.``() = 
         tag "maxBy query operator."
-        let q =
-            <@ query {
-                for student in db.Student do
-                maxBy student.StudentId
-            } @>
-        Utils.Run q
+        <@ query {
+            for student in db.Student do
+            maxBy student.StudentId
+        } @> |> Utils.Run
 
 
     
@@ -184,316 +158,314 @@ module Simple =
     [<Test>]
     let ``groupBy query operator.``() = 
         tag "groupBy query operator."
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             groupBy student.Age into g
             select (g.Key, g.Count())
-            } @>
-        Utils.Run q
+        } @> |> Utils.Run
 
 
 
     [<Test>]
     let ``sortBy query operator.``() = 
         tag "sortBy query operator."
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             sortBy student.Name
             select student
-        } @>
-        Utils.Run q
+        } @> |> Utils.Run
 
 
 
     [<Test>]
     let ``sortByDescending query operator.``() = 
         tag "sortByDescending query operator."
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             sortByDescending student.Name
             select student
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``thenBy query operator.``() = 
         tag "thenBy query operator."
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             where (student.Age <> -1)
             sortBy student.Age
             thenBy student.Name
             select student
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``thenByDescending query operator.``() = 
         tag "thenByDescending query operator."
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             where (student.Age <> -1)
             sortBy student.Age
             thenByDescending student.Name
             select student
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``groupValBy query operator.``() = 
         tag "groupValBy query operator."
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             groupValBy student.Name student.Age into g
             select (g, g.Key, g.Count())
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``sumByNullable query operator``() = 
         tag "sumByNullable query operator"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             sumByNullable (Nullable student.Age)
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``minByNullable``() = 
         tag "minByNullable"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             minByNullable (Nullable student.Age)
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``maxByNullable``() = 
         tag "maxByNullable"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             maxByNullable (Nullable student.Age)
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``averageBy``() = 
         tag "averageBy"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             averageBy (float student.StudentId)
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``averageByNullable``() = 
         tag "averageByNullable"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
                 averageByNullable (Nullable <| float student.Age)
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``find query operator``() = 
         tag "find query operator"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
                 find (student.Name = "Abercrombie, Kim")
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``all query operator``() = 
         tag "all query operator"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
                 all (SqlMethods.Like(student.Name, "%,%"))
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``head query operator``() = 
         tag "head query operator"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             head
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``nth query operator``() = 
         tag "nth query operator"
-        let q = <@ query {
+        <@ query {
             for numbers in data do
             nth 3
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``skip query operator``() = 
         tag "skip query operator"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             skip 1
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``skipWhile query operator``() = 
         tag "skipWhile query operator"
-        let q = <@ query {
+        <@ query {
             for number in data do
             skipWhile (number < 3)
             select number
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``sumBy query operator``() = 
         tag "sumBy query operator"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             sumBy student.StudentId
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``take query operator``() = 
         tag "take query operator"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             select student
             take 2
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``takeWhile query operator``() = 
         tag "takeWhile query operator"
-        let q = <@ query {
+        <@ query {
             for number in data do
             takeWhile (number < 10)
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``sortByNullable query operator``() = 
         tag "sortByNullable query operator"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             sortByNullable (Nullable student.Age)
             select student
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``sortByNullableDescending query operator``() = 
         tag "sortByNullableDescending query operator"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             sortByNullableDescending (Nullable student.Age)
             select student
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``thenByNullable query operator``() = 
         tag "thenByNullable query operator"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             sortBy student.Name
             thenByNullable (Nullable student.Age)
             select student
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``thenByNullableDescending query operator``() = 
         tag "thenByNullableDescending query operator"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             sortBy student.Name
             thenByNullableDescending (Nullable student.Age)
             select student
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``All students:``() = 
         tag "All students: "
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do
                 select student
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Count of students:``() = 
         tag "Count of students: "
-        let q = <@ query {
-                for student in db.Student do        
+        <@ query {
+                for student in db.Student.AsEnumerable() do        
                 count
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
     [<Test>]
     let ``Exists.``() = 
         tag "Exists, native QueryBuilder."
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
                 where (ExtraTopLevelOperators.query 
                     { for courseSelection in db.CourseSelection do
                         exists (courseSelection.StudentId = student.StudentId) })
                 select student } @>
-        Utils.Run q
+        |> Utils.Run
 
     
 
@@ -501,88 +473,88 @@ module Simple =
     [<Test>]
     let ``Exists (bug).``() = 
         tag "Exists."
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
                 where (query 
                     { for courseSelection in db.CourseSelection do
                         exists (courseSelection.StudentId = student.StudentId) })
                 select student } @>
-        Utils.Run q
+        |> Utils.Run
 
 
     [<Test>]
     let ``Group by age and count``() = 
         tag "Group by age and count"
-        let q = <@ query {
+        <@ query {
                 for n in db.Student do
                 groupBy n.Age into g
                 select (g.Key, g.Count())
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Group value by age.``() = 
         tag "Group value by age."
-        let q = <@ query {
+        <@ query {
                 for n in db.Student do
                 groupValBy n.Age n.Age into g
                 select (g.Key, g.Count())
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Group students by age where age > 10.``() = 
         tag "Group students by age where age > 10."
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do
                 groupBy student.Age into g
                 where (g.Key > 10)
                 select (g, g.Key)
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
     [<Test>]
     let ``Group students by age and print counts of number of students at each age with more than 1 student.``() = 
         tag "Group students by age and print counts of number of students at each age with more than 1 student."
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do
                 groupBy student.Age into group
                 where (group.Count() > 1)
                 select (group.Key, group.Count())
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Group students by age and sum ages.``() = 
         tag "Group students by age and sum ages."
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do
                 groupBy student.Age into g        
                 let total = query { for student in g do sumByNullable (Nullable student.Age) }
                 select (g.Key, g.Count(), total)
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Group students by age and count number of students at each age, and display all with count > 1 in descending order of count.``() = 
         tag "Group students by age and count number of students at each age, and display all with count > 1 in descending order of count."
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do
                 groupBy student.Age into g
                 where (g.Count() > 1)        
                 sortByDescending (g.Count())
                 select (g.Key, g.Count())
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
@@ -592,73 +564,70 @@ module Simple =
         let idList = [1; 2; 5; 10]
         let idQuery = query { for id in idList do
                                 select id }
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do
                 where (idQuery.Contains(student.StudentId))
                 select student
                 } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Look for students with Name match _e%% pattern and take first two.``() = 
         tag "Look for students with Name match _e%% pattern and take first two."
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             where (SqlMethods.Like( student.Name, "_e%") )
             select student
             take 2   
-            } @>
-        Utils.Run q
+        } @> |> Utils.Run
 
 
 
     [<Test>]
     let ``Look for students with Name matching [abc]%% pattern.``() = 
         tag "Look for students with Name matching [abc]%% pattern."
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             where (SqlMethods.Like( student.Name, "[abc]%") )
             select student  
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Look for students with name matching [^abc]%% pattern.``() = 
         tag "Look for students with name matching [^abc]%% pattern."
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             where (SqlMethods.Like( student.Name, "[^abc]%") )
             select student  
-            } @>
-        Utils.Run q
+        } @> |> Utils.Run 
 
 
 
     [<Test>]
     let ``Look for students with name matching [^abc]%% pattern and select ID.``() = 
         tag "Look for students with name matching [^abc]%% pattern and select ID."
-        let q = <@ query {
+        <@ query {
             for n in db.Student do
             where (SqlMethods.Like( n.Name, "[^abc]%") )
             select n.StudentId    
-            } @>
-        Utils.Run q
+        } @> |> Utils.Run
 
 
 
     [<Test>]
     let ``Using Contains as a query filter.``() = 
         tag "Using Contains as a query filter."
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do
                 where (student.Name.Contains("a"))
                 select student
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
@@ -666,117 +635,117 @@ module Simple =
     let ``Searching for names from a list.``() = 
         tag "Searching for names from a list."
         let names = [|"a";"b";"c"|]
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
-            if names.Contains (student.Name) then select student } @>
-        Utils.Run q
+            if names.Contains (student.Name) then select student } 
+        @> |> Utils.Run
 
 
     [<Test>]
     let ``Join Student and CourseSelection tables.``() = 
         tag "Join Student and CourseSelection tables."
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do 
                 join selection in db.CourseSelection 
                     on (student.StudentId = selection.StudentId)
                 select (student, selection)
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Left Join Student and CourseSelection tables.``() = 
         tag "Left Join Student and CourseSelection tables."
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             leftOuterJoin selection in db.CourseSelection 
                 on (student.StudentId = selection.StudentId) into result
             for selection in result.DefaultIfEmpty() do
             select (student, selection)
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Join with count``() = 
         tag "Join with count"
-        let q = <@ query {
+        <@ query {
                 for n in db.Student do 
                 join e in db.CourseSelection on (n.StudentId = e.StudentId)
                 count        
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Join with distinct.``() = 
         tag "Join with distinct."
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do 
                 join selection in db.CourseSelection on (student.StudentId = selection.StudentId)
                 distinct        
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Join with distinct and count.``() = 
         tag "Join with distinct and count."
-        let q = <@ query {
+        <@ query {
                 for n in db.Student do 
                 join e in db.CourseSelection on (n.StudentId = e.StudentId)
                 distinct
                 count       
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Selecting students with age between 10 and 15.``() = 
         tag "Selecting students with age between 10 and 15."
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do
                 where (student.Age >= 10 && student.Age < 15)
                 select student
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Selecting students with age either 11 or 12.``() = 
         tag "Selecting students with age either 11 or 12."
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do
                 where (student.Age = 11 || student.Age = 12)
                 select student
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Selecting students in a certain age range and sorting.``() = 
         tag "Selecting students in a certain age range and sorting."
-        let q = <@ query {
+        <@ query {
                 for n in db.Student do
                 where (n.Age = 12 || n.Age = 13)
                 sortByDescending  n.Age
                 select n
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Selecting students with certain ages, taking account of possibility of nulls.``() = 
         tag "Selecting students with certain ages, taking account of possibility of nulls."
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do
                 where ((student.Age = 11) ||
                         (student.Age = 12))
@@ -784,7 +753,7 @@ module Simple =
                 select student.Name
                 take 2
             } @>
-        Utils.Run q
+        |> Utils.Run
 
             
             
@@ -802,8 +771,8 @@ module Simple =
                 select (n.Name, n.Age)
                 } @>
 
-        let q = <@ query { for n in (%query1).Union(%query2) do select n } @>
-        Utils.Run q
+        <@ query { for n in (%query1).Union(%query2) do select n } @>
+        |> Utils.Run
 
     [<Test>]
     let ``Union of two queries (enumerable)``() = 
@@ -815,8 +784,8 @@ module Simple =
         let lb = [3;4;5;6]
         let query2 = <@ query { for n in lb do yield n } @>
 
-        let q = <@ query { yield! (%query1).Union(%query2) } @>
-        Utils.Run q
+        <@ query { yield! (%query1).Union(%query2) } @>
+        |> Utils.Run
 
 
 
@@ -827,28 +796,28 @@ module Simple =
         let query1 = <@ query { for n in db.Student do select (n.Name, n.Age) } @>
         let query2 = <@ query { for n in db.LastStudent do select (n.Name, n.Age) } @>
 
-        let q = <@ query { yield! (%query1).Intersect(%query2) } @>
+        <@ query { yield! (%query1).Intersect(%query2) } @>
 
-        Utils.Run q
+        |> Utils.Run
 
 
     [<Test>]
     let ``Using if statement to alter results for special value.``() = 
         tag "Using if statement to alter results for special value."
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do
                 select (if student.Age = -1 then
                             (student.StudentId, 100, student.Age)
                         else (student.StudentId, student.Age, student.Age))
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Using if statement to alter results special values.``() = 
         tag "Using if statement to alter results special values."
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do
                 select (if  student.Age = -1 then
                             (student.StudentId, 100, student.Age)
@@ -856,7 +825,7 @@ module Simple =
                             (student.StudentId, 100, student.Age)
                         else (student.StudentId, student.Age, student.Age))
             } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
@@ -864,19 +833,19 @@ module Simple =
     [<Test>]
     let ``Multiple table select.``() = 
         tag "Multiple table select."
-        let q = <@ query {
+        <@ query {
                 for student in db.Student do
                 for course in db.Course do
                 select (student, course)
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Multiple Joins``() = 
         tag "Multiple Joins"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             join courseSelection in db.CourseSelection on
                 (student.StudentId = courseSelection.StudentId)
@@ -884,14 +853,14 @@ module Simple =
                     (courseSelection.CourseId = course.CourseId)
             select (student.Name, course.CourseName)
         } @>
-        Utils.Run q
+        |> Utils.Run
 
 
 
     [<Test>]
     let ``Multiple Left Outer Joins``() = 
         tag "Multiple Left Outer Joins"
-        let q = <@ query {
+        <@ query {
             for student in db.Student do
             leftOuterJoin courseSelection in db.CourseSelection 
                 on (student.StudentId = courseSelection.StudentId) into g1
@@ -901,5 +870,5 @@ module Simple =
             for course in g2.DefaultIfEmpty() do
             select (student.Name, course.CourseName)
             } @>
-        Utils.Run q
+        |> Utils.Run
 

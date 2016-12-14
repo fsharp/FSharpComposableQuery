@@ -6,6 +6,7 @@ open NUnit.Framework
 open System.Linq
 open System.Xml.Linq
 open FSharpComposableQuery
+open System.Data.SQLite
 open FSharp.Data.Sql
 
 /// <summary>
@@ -21,7 +22,8 @@ module Xml =
 
     let basicXml = XElement.Parse "<a id='1'><b><c>foo</c></b><d><e/><f/></d></a>"
 
-    let [<Literal>] connectionString = "DataSource=" + __SOURCE_DIRECTORY__ + @"/../databases/xml.db;" + "Version=3;foreign keys = true"
+    let [<Literal>] dbpath = __SOURCE_DIRECTORY__ + @"/../databases/xml.db"
+    let [<Literal>] connectionString = "DataSource=" + dbpath + ";Version=3;foreign keys = true"
     let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net46"
     type sql = SqlDataProvider<
                 Common.DatabaseProviderTypes.SQLITE
@@ -84,7 +86,8 @@ module Xml =
         /// <param name="path2">The path filter. </param>
         static member (^^) (path1, path2) = Seq(path1, Filter(path2))
 
-    let internal db = sql.GetDataContext().Main
+    let internal context = sql.GetDataContext()
+    let internal db = context.Main
     let internal data = db.Data
     let internal text = db.Text
     let internal attributes = db.Attribute
@@ -101,11 +104,12 @@ module Xml =
     let rec traverseXml entry parent i (node : XNode) =
         // creates an attribute record
         let traverseAttribute entry parent (att : XAttribute) =
-            let a = new Attribute()
+            let a = db.Attribute.Create()
             a.Element <- parent
             a.Name <- att.Name.LocalName
             a.Value <- att.Value
-            attributes.InsertOnSubmit(a)
+            context.SubmitUpdates()
+//            attributes. InsertOnSubmit(a)
 
         // recursively traverse all child nodes
         let traverseChildren entry parent i (xmls) = 
@@ -117,35 +121,41 @@ module Xml =
             let j = Seq.iter (traverseAttribute entry id) (xml.Attributes())
             let j = traverseChildren entry id (i + 1) (xml.Nodes())
 
-            let d = new DataEntity()
+            let d = db.Data.Create()
             d.Name <- xml.Name.ToString()
             d.Id <- id
             d.Entry <- entry
             d.Pre <- i
             d.Post <- j
             d.Parent <- parent
-            data.InsertOnSubmit(d)
+            context.SubmitUpdates()
 
-            data.Context.SubmitChanges()
+//            data.InsertOnSubmit(d)
+
+//            data.Context.SubmitChanges()
             j + 1
         | :? XText as xtext ->
             let id = new_id()
 
-            let d = new DataEntity()
+            let d = db.Data.Create()
             d.Name <- "#text"
             d.Id <- id
             d.Entry <- entry
             d.Pre <- i
             d.Post <- i
             d.Parent <- parent
-            data.InsertOnSubmit(d)
+            context.SubmitUpdates()
 
-            let t = new Text()
+//            data.InsertOnSubmit(d)
+
+            let t = db.Text.Create()
             t.Id <- id
             t.Value <- xtext.Value
-            text.InsertOnSubmit(t)
+            context.SubmitUpdates()
 
-            data.Context.SubmitChanges()
+//            text.InsertOnSubmit(t)
+
+//            data.Context.SubmitChanges()
             i + 1
         | _ -> i
         
@@ -156,15 +166,17 @@ module Xml =
     let insertXml entry xml =
         let root_id = new_id()
         let j = traverseXml entry root_id 1 xml
-        let d = new DataEntity()
+        let d = db.Data.Create()
         d.Id <- root_id
         d.Entry <- entry
         d.Pre <- 0
         d.Post <- j
         d.Parent <- -1
         d.Name <- "#document"
-        data.InsertOnSubmit(d)
-        data.Context.SubmitChanges()
+        context.SubmitUpdates()
+
+//        data.InsertOnSubmit(d)
+//        data.Context.SubmitChanges()
 
     /// <summary>
     /// Parses the given file as an Xml document, and then inserts its contents in the database. 
@@ -178,9 +190,14 @@ module Xml =
     /// Clears all relevant tables in the database. 
     /// </summary>
     let dropTables() =
-        ignore (db.DataContext.ExecuteCommand("TRUNCATE TABLE [FCQ-Xml].[dbo].[Attribute]"))
-        ignore (db.DataContext.ExecuteCommand("TRUNCATE TABLE [FCQ-Xml].[dbo].[Text]"))
-        ignore (db.DataContext.ExecuteCommand("TRUNCATE TABLE [FCQ-Xml].[dbo].[Data]"))
+        use conn = new SQLiteConnection(sprintf "DataSource=%s." dbpath)
+        conn.Open()
+        let sqlcmd cmdtxt = 
+            use cmd = new SQLiteCommand(cmdtxt,conn)
+            cmd.ExecuteNonQuery()|>ignore
+        sqlcmd "TRUNCATE TABLE [FCQ-Xml].[dbo].[Attribute]"
+        sqlcmd "TRUNCATE TABLE [FCQ-Xml].[dbo].[Text]"
+        sqlcmd "TRUNCATE TABLE [FCQ-Xml].[dbo].[Data]"
 
     /// <summary>
     /// Loads the basicXml file
@@ -196,7 +213,7 @@ module Xml =
     let internal axisPred axis =
         let rec axisPredRec axis =
             match axis with
-            | Self -> <@ fun (row1 : DataEntity) (row2 : DataEntity) -> row1.Id = row2.ID @>
+            | Self -> <@ fun (row1 : DataEntity) (row2 : DataEntity) -> row1.Id = row2.Id @>
             | Child -> <@ fun (row1 : DataEntity) (row2 : DataEntity) -> row1.Id = row2.Parent @>
             | Descendant -> <@ fun (row1 : DataEntity) (row2 : DataEntity) -> row1.Pre < row2.Pre && row2.Post < row1.Post @>
             | DescendantOrSelf -> <@ fun (row1 : DataEntity) (row2 : DataEntity) -> row1.Pre <= row2.Pre && row2.Post <= row1.Post @>

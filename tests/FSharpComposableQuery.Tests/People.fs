@@ -4,6 +4,7 @@ open Microsoft.FSharp.Data.TypeProviders
 open Microsoft.FSharp.Quotations
 open System.Linq
 open NUnit.Framework
+open System.Data.SQLite
 open FSharp.Data.Sql
 
 
@@ -17,7 +18,8 @@ module People =
     [<Literal>]
     let internal N_COUPLES = 5000
 
-    let [<Literal>] connectionString = "DataSource=" + __SOURCE_DIRECTORY__ + @"/../databases/people.db;" + "Version=3;foreign keys = true"
+    let [<Literal>] dbpath = __SOURCE_DIRECTORY__ + @"/../databases/people.db"
+    let [<Literal>] connectionString = "DataSource=" + dbpath + ";Version=3;foreign keys = true"
     let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net46"
     type sql = SqlDataProvider<
                 Common.DatabaseProviderTypes.SQLITE
@@ -34,7 +36,8 @@ module People =
     // Used in example 1
     type internal Result = { Name : string; Diff : int }
 
-    let internal db = sql.GetDataContext().Main
+    let internal context = sql.GetDataContext()
+    let internal db = context.Main
 
     // Used in example 6
     type internal Predicate =
@@ -54,17 +57,23 @@ module People =
         // db table manipulation
 
         // Adds the given CoupleR object as a row in the database. 
-        static let addCoupleR (c : Couple) =
-            couples.InsertOnSubmit(c)
+//        static let addCoupleR (c : Couple) =
+//            couples.InsertOnSubmit(c)
             
         // Adds the given PeopleR object as a row in the database. 
-        static let addPeopleR (p : Person) =
-            people.InsertOnSubmit(p)
+//        static let addPeopleR (p : Person) =
+//            people.InsertOnSubmit(p)
 
         // Clears all relevant tables in the database. 
         static let dropTables() =
-            ignore (db.DataContext.ExecuteCommand("TRUNCATE TABLE [FCQ-People].[dbo].[Couples]"))
-            ignore (db.DataContext.ExecuteCommand("TRUNCATE TABLE [FCQ-People].[dbo].[People]"))
+            use conn = new SQLiteConnection(sprintf "DataSource=%s." dbpath)
+            conn.Open()
+            let sqlcmd cmdtxt = 
+               use cmd = new SQLiteCommand(cmdtxt,conn)
+               cmd.ExecuteNonQuery()|>ignore
+
+            sqlcmd "TRUNCATE TABLE [FCQ-People].[dbo].[Couples]"
+            sqlcmd "TRUNCATE TABLE [FCQ-People].[dbo].[People]"
 
             
         static let rnd = new System.Random()
@@ -87,24 +96,27 @@ module People =
         static let randomAge() = rnd.Next(18, 80)
         static let randomMaleName() = (pickRandom >> addTag) maleNames
         static let randomFemaleName() = (pickRandom >> addTag) femaleNames
-        static let randomCouple() = new Couple(Him = randomMaleName(), Her = randomFemaleName())
+        static let randomCouple() = couples.Create(Him = randomMaleName(), Her = randomFemaleName())
         static let randomCouples n = List.map (ignore >> randomCouple) [ 1..n ]
 
         static let randomPersons (c:Couple) = 
-              [ new Person(Name = c.Him, Age = randomAge()) 
-                new Person(Name = c.Her, Age = randomAge()) ]
+              [ people.Create(Name = c.Him, Age = randomAge()) 
+                people.Create(Name = c.Her, Age = randomAge()) ]
 
         static let randomPeople = (List.map randomPersons >> List.concat)
 
         // Generates n random couples (and the corresponding people) records and then adds them to the database. 
         static let addRandom n =
             let couples = randomCouples n
-            List.iter addCoupleR couples
-            db.DataContext.SubmitChanges()
+//            List.iter addCoupleR couples
+//            db.DataContext.SubmitChanges()
+            context.SubmitUpdates()
 
             let people = randomPeople couples
-            List.iter addPeopleR people
-            db.DataContext.SubmitChanges()
+//            List.iter addPeopleR people
+//            db.DataContext.SubmitChanges()
+            context.SubmitUpdates()
+
 
         // Example 1
         let differences =

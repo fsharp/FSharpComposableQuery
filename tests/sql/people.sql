@@ -7,7 +7,7 @@ CREATE TABLE People (
 
 DROP TABLE IF EXISTS Couples;
 CREATE TABLE Couples (
-    Her VARCHAR(255) NOT NULL,
-    Him VARCHAR(255) NOT NULL,
-    PRIMARY KEY (Her,Him ASC)
+    [Her] VARCHAR(255) NOT NULL,
+    [Him] VARCHAR(255) NOT NULL,
+    PRIMARY KEY ([Her],[Him] ASC)
 );

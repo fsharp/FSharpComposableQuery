@@ -118,8 +118,6 @@ Target "BuildTest" (fun _ ->
 open Fake.Testing
 
 Target "RunTests" (fun _ ->
-//    let nunitPath = sprintf  nunitVersion
-//    ActivateFinalTarget "CloseTestRunner"
 
     testAssemblies
     |> NUnit3 (fun p ->
@@ -129,10 +127,6 @@ Target "RunTests" (fun _ ->
             TimeOut = TimeSpan.FromMinutes 20.
             OutputDir = "bin/tests/TestResults.xml" })
 )
-
-//FinalTarget "CloseTestRunner" (fun _ ->
-//    ProcessHelper.killProcess "nunit-agent.exe"
-//)
 
 // --------------------------------------------------------------------------------------
 // Build a NuGet package
@@ -189,8 +183,7 @@ open System.Data.SQLite
 
 Target "DbSetup" (fun _ ->
     ensureDirectory "tests/databases"
-    let scriptsDir = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "tests/FSharpComposableQuery.Tests/sql")
-    for f in System.IO.Directory.EnumerateFiles(scriptsDir) do
+    for f in !! "tests/sql/*" do
         let dbname = System.IO.Path.GetFileNameWithoutExtension(f)
         use conn = new SQLiteConnection(sprintf "DataSource=tests/databases/%s.db" dbname)
         conn.Open()

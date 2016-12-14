@@ -120,14 +120,6 @@
     <Compile Include="NorthwindTests.fs" />
     <Compile Include="ExtraTests.fs" />
     <Compile Include="RunTests.fs" />
-    <None Include="sql\organisation.sql" />
-    <None Include="sql\simple.sql" />
-    <None Include="sql\xml.sql" />
-    <None Include="sql\people.sql" />
-    <None Include="sql\tpch.sql" />
-    <Content Include="data\movies.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="db.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

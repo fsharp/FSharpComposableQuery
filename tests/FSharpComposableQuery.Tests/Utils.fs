@@ -90,8 +90,8 @@ module ExprUtils =
                 match e1 with
                 | Some e1 -> Expr.PropertySet(tExp e1, pi, tExp e2, tList l)
                 | None -> Expr.PropertySet(pi, tExp e2, tList l)
+            | Patterns.QuoteTyped(e1) -> Expr.QuoteTyped(tExp e1)
             | Patterns.QuoteRaw(e1) -> Expr.QuoteRaw(tExp e1)
-            | Patterns.QuoteTyped(e1) -> Expr.QuoteRaw(tExp e1)
             | Patterns.Sequential(e1, e2) -> Expr.Sequential(tExp e1, tExp e2)
             | Patterns.TryFinally(e1, e2) -> Expr.TryFinally(tExp e1, tExp e2)
             | Patterns.TryWith(e1, v1, e2, v2, e3) -> Expr.TryWith(tExp e1, v1, tExp e2, v2, tExp e3)
@@ -183,7 +183,9 @@ type Utils() =
     static let extractBodyRaw(e:Expr<'T>) =
         match e with
         | Patterns.Application (Patterns.Lambda(_, Patterns.Call(Some _, mi, [Patterns.QuoteRaw(q)])), _)
-        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(None,   mi, [_; Patterns.QuoteRaw(q)])), _) ->
+        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(Some _, mi, [Patterns.QuoteTyped(q)])), _)
+        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(None,   mi, [_; Patterns.QuoteRaw(q)])), _)
+        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(None,   mi, [_; Patterns.QuoteTyped(q)])), _) ->
             q
         | _ ->
             failwith "Unable to find an outermost query expression"

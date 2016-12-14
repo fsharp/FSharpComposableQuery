@@ -306,7 +306,7 @@ module Simple =
         tag "averageByNullable"
         let q = <@ query {
             for student in db.Student do
-            averageByNullable (Nullable <| float student.Age)
+                averageByNullable (Nullable <| float student.Age)
             } @>
         Utils.Run q
 
@@ -317,7 +317,7 @@ module Simple =
         tag "find query operator"
         let q = <@ query {
             for student in db.Student do
-            find (student.Name = "Abercrombie, Kim")
+                find (student.Name = "Abercrombie, Kim")
         } @>
         Utils.Run q
 
@@ -328,7 +328,7 @@ module Simple =
         tag "all query operator"
         let q = <@ query {
             for student in db.Student do
-            all (SqlMethods.Like(student.Name, "%,%"))
+                all (SqlMethods.Like(student.Name, "%,%"))
         } @>
         Utils.Run q
 

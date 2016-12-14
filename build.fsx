@@ -199,7 +199,7 @@ Target "DbSetup" (fun _ ->
        let dbname = System.IO.Path.GetFileNameWithoutExtension(f)
        use conn = new SQLiteConnection(sprintf "DataSource=%s.db" dbname)
        conn.Open()
-       printfn "Creating db: %s" f
+       printfn "Creating db: %s" dbname
        let scriptTxt = ReadFileAsString f
        use cmd = conn.CreateCommand()
        cmd.CommandText <- scriptTxt

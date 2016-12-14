@@ -125,9 +125,6 @@
     <None Include="sql\xml.sql" />
     <None Include="sql\people.sql" />
     <None Include="sql\tpch.sql" />
-    <Content Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="data\movies.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -136,6 +133,9 @@
     </None>
     <None Include="db.config.sample" />
     <None Include="README.md" />
+    <Content Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\FSharpComposableQuery\FSharpComposableQuery.fsproj">

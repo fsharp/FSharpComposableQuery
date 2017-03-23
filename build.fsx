@@ -226,4 +226,4 @@ Target "All" DoNothing
     ==> "NuGet" 
     ==> "Release"
 
-RunTargetOrDefault "Build"
+RunTargetOrDefault "RunTests"

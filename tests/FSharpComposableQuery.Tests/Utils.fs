@@ -6,7 +6,12 @@ open System.Linq
 open Microsoft.FSharp.Linq
 open Microsoft.FSharp.Quotations
 open FSharpComposableQuery
+#if MONO 
+open Mono.Data.Sqlite
+#else
 open System.Data.SQLite
+#endif
+
 open NUnit.Framework
 
 [<SetUpFixtureAttribute>]
@@ -21,7 +26,11 @@ type Init () =
         for f in Directory.EnumerateFiles (__SOURCE_DIRECTORY__ + "../../sql" ) do
             let dbname = System.IO.Path.GetFileNameWithoutExtension(f)
             let dbdir = __SOURCE_DIRECTORY__ + "../../databases"
+            #if MONO 
+            use conn = new SqliteConnection(sprintf "Data Source=%s/%s.db" dbdir dbname)
+            #else
             use conn = new SQLiteConnection(sprintf "DataSource=%s/%s.db" dbdir dbname)
+            #endif
             conn.Open()
             printfn "Creating db: %s" dbname
             let scriptTxt = File.ReadAllText f

@@ -1,13 +1,14 @@
 // --------------------------------------------------------------------------------------
 // FAKE build script 
 // --------------------------------------------------------------------------------------
-
+#r "System.IO.Compression.FileSystem"
 #r @"packages/build/FAKE/tools/FakeLib.dll"
 open Fake 
 open Fake.Git
 open Fake.AssemblyInfoFile
 open Fake.ReleaseNotesHelper
 open System
+open System.IO
 
 
 
@@ -49,8 +50,7 @@ let buildDir = "./bin/"
 let testBuildDir = "./bin/tests"
 
 
-// Pattern specifying assemblies to be tested using MSTest
-let testAssemblies = !! "bin/tests/FSharpComposableQuery*Tests*"
+
 
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted 
@@ -58,9 +58,17 @@ let gitHome = "https://github.com/fsprojects"
 // The name of the project on GitHub
 let gitName = "FSharpComposableQuery"
 
-// --------------------------------------------------------------------------------------
-// END TODO: The rest of the file includes standard build steps 
-// --------------------------------------------------------------------------------------
+let run cmd args dir =
+    ExecProcess (fun info ->
+        info.FileName <- cmd
+        if not (String.IsNullOrWhiteSpace dir) then
+            info.WorkingDirectory <- dir
+        info.Arguments <- args
+        info.RedirectStandardOutput <- true 
+        info.RedirectStandardError <- true
+    )  System.TimeSpan.MaxValue |> ignore
+
+
 
 // Read additional information from the release notes document
 Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
@@ -95,13 +103,68 @@ Target "CleanDocs" (fun _ ->
     CleanDirs ["docs/output"]
 )
 
+Target "SetupSqlite" (fun _ ->
+//if isWindows && not isMono then
+//    let frameworks = ["net40"; "net45"; "net46";"net451"]
+//    frameworks
+//    |> List.iter (fun fwrk ->
+//        let x86source = sprintf "packages/test/System.Data.SQLite.Core/build/%s/x86" fwrk
+//        let x64source = sprintf "packages/test/System.Data.SQLite.Core/build/%s/x64" fwrk
+        
+//        let x64target = sprintf "packages/test/System.Data.SQLite.Core/lib/%s/x64" fwrk
+//        let x86target = sprintf "packages/test/System.Data.SQLite.Core/lib/%s/x86" fwrk
+        
+//        if not (directoryExists x86target) then
+//            CopyDir x86target x86source (fun _ -> true)
+//        if not (directoryExists x64target) then
+//            CopyDir x64target x64source (fun _ -> true)
+//    )
+
+    if isMono then 
+        let fullPath = Path.GetFullPath
+        let sqliteDir = fullPath "sqlite"
+        let sqliteVersion = "1.0.104.0"
+        let sqliteArchive = sprintf "sqlite-netFx-source-%s.zip" sqliteVersion
+        let sqliteSrcUrl  = sprintf "https://system.data.sqlite.org/downloads/%s/sqlite-netFx-source-%s.zip" sqliteVersion sqliteVersion
+        let sqliteArchivePath = sqliteDir</>sqliteArchive
+        let sqliteSetupDir = sqliteDir</>"Setup"
+        let compileInterop = sqliteSetupDir</>"compile-interop-assembly-release.sh"
+        let sqliteBin = sqliteDir</>"bin"
+        let interopBin = sqliteBin</>"2013"</>"Release"</>"bin"
+        let sqliteInteropMono = interopBin</>"libSQLite.Interop.so"
+        let testbinDebug = "tests/FSharpComposableQuery.Tests/bin/Debug"
+        let testbinRelease = "tests/FSharpComposableQuery.Tests/bin/Release"
+
+        if not (fileExists sqliteInteropMono) then
+            ensureDirectory sqliteDir
+
+            if not (fileExists sqliteArchivePath) then 
+                use webclient = new System.Net.WebClient()
+                webclient.DownloadFile (sqliteSrcUrl, sqliteDir)
+            
+            Compression.ZipFile.ExtractToDirectory (sqliteArchivePath, sqliteDir)
+            
+            run "chmod" ("+x "+compileInterop) sqliteSetupDir
+            run compileInterop "" sqliteSetupDir
+
+            (directoryInfo sqliteBin).EnumerateFiles("*.*", System.IO.SearchOption.AllDirectories)
+            |> Seq.iter (fun (fi:FileInfo) -> printfn "  - %s" fi.FullName)
+
+            ensureDirectory testbinDebug
+            ensureDirectory testbinRelease
+
+        CopyFile "packages/test/Mono.Data.SQLite.Portable" sqliteInteropMono 
+        CopyFile testbinDebug sqliteInteropMono
+        CopyFile testbinRelease sqliteInteropMono
+)
+
 
 // --------------------------------------------------------------------------------------
 // Build library
 
 Target "Build" (fun _ ->
 //    let props = [("DocumentationFile", project + ".XML")]   //explicitly generate XML documentation
-    MSBuildRelease buildDir "Rebuild" libraryReferences
+    MSBuildRelease buildDir "Build" libraryReferences
     |> Log "Build-Output: "
 )
 
@@ -109,13 +172,15 @@ Target "Build" (fun _ ->
 // Build tests and library
 
 Target "BuildTest" (fun _ ->
-    MSBuildRelease testBuildDir "Rebuild" testReferences
+    MSBuildDebug "" "Rebuild" testReferences
     |> Log "BuildTest-Output: "
 )
 
 // --------------------------------------------------------------------------------------
 // Run unit tests using test runner & kill test runner when complete
 open Fake.Testing
+// Pattern specifying assemblies to be tested
+let testAssemblies = !! "tests/FSharpComposableQuery.Tests/bin/Debug/FSharpComposableQuery*Tests*.dll"
 
 Target "RunTests" (fun _ ->
 
@@ -179,14 +244,24 @@ Target "ReleaseDocs" (fun _ ->
 
 #r "System.Data"
 open System.Data
-#r @"packages/test/System.Data.SQLite.Core/lib/net451/System.Data.SQLite.dll"
+#if MONO 
+#r @"packages/test/Mono.Data.Sqlite.Portable/lib/net4/Mono.Data.Sqlite.dll"
+open Mono.Data.Sqlite
+#else
+#r @"packages/test/System.Data.SQLite.Core/lib/net45/System.Data.SQLite.dll"
 open System.Data.SQLite
+#endif
 
 Target "DbSetup" (fun _ ->
     ensureDirectory "tests/databases"
     for f in !! "tests/sql/*" do
         let dbname = System.IO.Path.GetFileNameWithoutExtension(f)
-        use conn = new SQLiteConnection(sprintf "DataSource=tests/databases/%s.db" dbname)
+        use conn = 
+        #if MONO 
+            new SqliteConnection(sprintf "Data Source=tests/databases/%s.db" dbname)
+        #else
+            new SQLiteConnection(sprintf "DataSource=tests/databases/%s.db" dbname)
+        #endif 
         conn.Open()
         printfn "Creating db: %s" dbname
         let scriptTxt = ReadFileAsString f
@@ -204,7 +279,8 @@ Target "All" DoNothing
 // --------------------------------------------------------------------------------------
 // Run 'Build' target by default. Invoke 'build <Target>' to override
 
-"Clean" 
+"Clean"
+    ==> "SetupSqlite"
     ==> "AssemblyInfo" 
     ==> "Build"
 

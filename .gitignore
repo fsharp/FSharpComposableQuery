@@ -4,6 +4,8 @@
 /.fake/
 /.paket/paket.exe
 /tests/databases/
+/sqlite/
+
 # User-specific files
 *.suo
 *.user

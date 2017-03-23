@@ -8,6 +8,5 @@ if errorlevel 1 (
 if errorlevel 1 (
   exit /b %errorlevel%
 )
-packages\build\FAKE\tools\FAKE.exe setupSqlite.fsx
 
 packages\build\FAKE\tools\FAKE.exe build.fsx %*

@@ -25,7 +25,6 @@ module QueryTests =
     let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/lib/net46"
     type sql = SqlDataProvider<
                 Common.DatabaseProviderTypes.SQLITE
-            ,   SQLiteLibrary = Common.SQLiteLibrary.SystemDataSQLite
             ,   ConnectionString = connectionString
             ,   ResolutionPath = resolutionPath
             ,   CaseSensitivityChange = Common.CaseSensitivityChange.ORIGINAL

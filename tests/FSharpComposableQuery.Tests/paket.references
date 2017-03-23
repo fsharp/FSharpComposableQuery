@@ -1,4 +1,4 @@
+FSharp.Core
 group test
 NUnit
 SQLprovider
-System.Data.SQLite.Core

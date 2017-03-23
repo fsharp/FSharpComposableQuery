@@ -20,27 +20,27 @@ module Nested =
             ,   SQLiteLibrary = Common.SQLiteLibrary.SystemDataSQLite
             ,   ConnectionString = connectionString
             ,   ResolutionPath = resolutionPath
-            ,   CaseSensitivityChange = Common.CaseSensitivityChange.ORIGINAL  
+            ,   CaseSensitivityChange = Common.CaseSensitivityChange.ORIGINAL
             >
 
     let context = sql.GetDataContext ()
     let db = context.Main
 
-    // TypeProvider type abbreviations. 
+    // TypeProvider type abbreviations.
     type Department = sql.dataContext.``main.DepartmentsEntity``
     type Employee   = sql.dataContext.``main.EmployeesEntity``
     type Contact    = sql.dataContext.``main.ContactsEntity``
     type Task       = sql.dataContext.``main.TasksEntity``
-    
+
     //Nested type declarations
-    type EmployeeTasks = { 
+    type EmployeeTasks = {
         Emp : string
-        Tasks : System.Linq.IQueryable<string> 
+        Tasks : System.Linq.IQueryable<string>
     }
 
-    type DepartmentEmployees = { 
+    type DepartmentEmployees = {
         Dpt : string
-        Employees : System.Linq.IQueryable<EmployeeTasks> 
+        Employees : System.Linq.IQueryable<EmployeeTasks>
     }
 
     type NestedOrg = System.Linq.IQueryable<DepartmentEmployees>
@@ -71,29 +71,29 @@ module Nested =
         randomArray [| "alan"; "bert"; "charlie"; "david"; "edward"; "alice"; "betty"; "clara"; "dora"; "eve" |]
         |> genId
 
-    let randomTask() = 
-        randomArray [| "abstract"; "buy"; "call"; "dissemble"; "enthuse" |] 
+    let randomTask() =
+        randomArray [| "abstract"; "buy"; "call"; "dissemble"; "enthuse" |]
         |> genId
 
-    let randomDepartment() = 
-        randomArray [| "Sales"; "Research"; "Quality"; "Product" |] 
+    let randomDepartment() =
+        randomArray [| "Sales"; "Research"; "Quality"; "Product" |]
         |> genId
 
     /// <summary>
-    /// Generates n uniquely named employees and distributes them uniformly across the given departments. 
+    /// Generates n uniquely named employees and distributes them uniformly across the given departments.
     /// </summary>
-    let randomEmployees n depts = 
+    let randomEmployees n depts =
         [ 1 .. n ]
-        |> List.map (fun _ -> 
+        |> List.map (fun _ ->
             employees.Create
                 (   rand.Next(10000,60000) (* salary *)
                 ,   Emp = randomName()
                 ,   Dpt = randomArray depts
             )
-        ) 
+        )
 
     /// <summary>
-    /// Generates n uniquely named employees in each of the given departments. 
+    /// Generates n uniquely named employees in each of the given departments.
     /// </summary>
     let randomEmployeesInEach n depts =
         depts
@@ -102,11 +102,11 @@ module Nested =
         |> List.concat
 
     /// <summary>
-    /// Generates n uniquely named contacts and distributes them uniformly across the given departments. 
+    /// Generates n uniquely named contacts and distributes them uniformly across the given departments.
     /// </summary>
     let randomContacts n depts =
         [ 1..n ]
-        |> List.map (fun _ -> 
+        |> List.map (fun _ ->
             let contact = contacts.Create()
             contact.Dpt <- randomArray depts
             contact.Contact <- randomName()
@@ -115,19 +115,19 @@ module Nested =
         )
 
     /// <summary>
-    /// Generates 0 to 2 (inclusive) unique tasks for each of the given employees. 
+    /// Generates 0 to 2 (inclusive) unique tasks for each of the given employees.
     /// </summary>
     let randomTasks emps =
         emps
         |> List.map (fun (r : Employee) ->
-            List.map (fun _ -> 
+            List.map (fun _ ->
                 tasks.Create(Emp = r.Emp, Tsk = randomTask())) [1 .. rand.Next 3])
         |> List.concat
 
-           
+
     /// <summary>
-    /// Creates a number of random departments and uniformly distributes the specified number of employees across them, 
-    /// then updates the database with the new rows. 
+    /// Creates a number of random departments and uniformly distributes the specified number of employees across them,
+    /// then updates the database with the new rows.
     /// </summary>
     /// <param name="nDep">The number of departments to generate. </param>
     /// <param name="nEmp">The total number of employees to generate. </param>
@@ -141,7 +141,7 @@ module Nested =
 
     /// <summary>
     /// Creates a number of random departments and in each of them generates the specified number of employees,
-    /// then updates the database with the new rows. 
+    /// then updates the database with the new rows.
     /// </summary>
     /// <param name="nDep">The number of departments to generate. </param>
     /// <param name="nEmp">The number of employees to generate in each department. </param>
@@ -152,7 +152,7 @@ module Nested =
         let tasks = randomTasks employees
         context.SubmitUpdates()
 
-            
+
     /// <summary>
     /// Creates a department named 'Abstraction' and generates a specified number of employees in it,
     /// each of whom can perform the task "abstract"
@@ -165,7 +165,7 @@ module Nested =
         let tasks = randomTasks employees
         employees
         |> List.iter (fun (e : Employee) ->
-            db.Tasks.Create(Emp = e.Emp, Tsk = "abstract")|>ignore) 
+            db.Tasks.Create(Emp = e.Emp, Tsk = "abstract")|>ignore)
         context.SubmitUpdates()
 
 
@@ -182,7 +182,6 @@ module Nested =
         <@ fun xs p -> query {
                 for x in xs do exists (p x)
         } @>
-                
 
     (* There are a number of ways to write each of the following queries *)
 
@@ -206,8 +205,8 @@ module Nested =
         } @>
 
 (*
-    Example 8 and 9 demonstrate the benefit of using intermediate nested structures. 
-    Each of them evaluates to the same query but the way we formulate them is inherently different. 
+    Example 8 and 9 demonstrate the benefit of using intermediate nested structures.
+    Each of them evaluates to the same query but the way we formulate them is inherently different.
 
     "List all departments where every employee can perform a given task t"
 *)
@@ -215,23 +214,23 @@ module Nested =
 
     [<Test>]
     let test01() =
-        <@ query { 
-            yield! (%expertiseNaive) "abstract" 
+        <@ query {
+            yield! (%expertiseNaive) "abstract"
         } @> |> Utils.Run
 
     let nestedDb = <@ query {
-        for d in db.Departments.AsEnumerable() do yield { 
+        for d in db.Departments.AsEnumerable() do yield {
             Dpt = d.Dpt
             Employees = query {
                 for e in db.Employees.AsQueryable() do
-                    if d.Dpt = e.Dpt then yield { 
+                    if d.Dpt = e.Dpt then yield {
                         Emp   = e.Emp
                         Tasks = query {
                             for t in db.Tasks do
                                 if t.Emp = e.Emp then yield t.Tsk
-                        } 
+                        }
                     }
-            } 
+            }
         }
     } @>
 
@@ -242,20 +241,20 @@ module Nested =
         } @>
 
     // This query evaluates, but it lazily constructs the result
-    // by stitching SQL queries: one for every department and employee. 
-    // Thus accessing even parts of the data is done by executing 
-    // multiple queries instead of, possibly, one.  
+    // by stitching SQL queries: one for every department and employee.
+    // Thus accessing even parts of the data is done by executing
+    // multiple queries instead of, possibly, one.
     let test00() =
-        query { 
-            yield! (%nestedDb) 
+        query {
+            yield! (%nestedDb)
         } |> ignore
-        
+
 
     // Example 9
 
 
     [<Test>]
     let test02() =
-        <@ query { 
-            yield! (%expertise) "abstract" } 
-        @> |> Utils.Run 
+        <@ query {
+            yield! (%expertise) "abstract" }
+        @> |> Utils.Run

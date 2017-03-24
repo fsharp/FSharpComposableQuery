@@ -84,6 +84,43 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
+  <Choose>
+    <When Condition=" '$(OS)' == 'Unix' ">
+      <ItemGroup>
+        <Reference Include="System.Transactions">
+        </Reference>
+        <Reference Include="Mono.Data.Sqlite">
+          <HintPath>..\..\packages\test\Mono.Data.Sqlite.Portable\lib\net4\Mono.Data.Sqlite.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Data.Portable">
+          <HintPath>..\..\packages\test\Mono.Data.Sqlite.Portable\lib\net4\System.Data.Portable.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Transactions.Portable">
+          <HintPath>..\..\packages\test\Mono.Data.Sqlite.Portable\lib\net4\System.Transactions.Portable.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <None Include="..\..\packages\test\System.Data.SQLite.Core\lib\net46\x64\SQLite.Interop.dll">          
+          <Link>x64\SQLite.Interop.dll</Link>
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Include="..\..\packages\test\System.Data.SQLite.Core\lib\net46\x86\SQLite.Interop.dll">
+          <Link>x86\SQLite.Interop.dll</Link>
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <Reference Include="System.Data.SQLite">
+          <HintPath>..\..\packages\test\System.Data.SQLite.Core\lib\net46\System.Data.SQLite.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+  
   <ItemGroup>
     <None Include="paket.references" />
     <Compile Include="Utils.fs" />
@@ -115,42 +152,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
-  <Choose>
-    <When Condition=" '$(OS)' == 'Unix' ">
-      <ItemGroup>
-        <Reference Include="System.Transactions">
-        </Reference>
-        <Reference Include="Mono.Data.Sqlite">
-          <HintPath>..\..\packages\test\Mono.Data.Sqlite.Portable\lib\net4\Mono.Data.Sqlite.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-        <Reference Include="System.Data.Portable">
-          <HintPath>..\..\packages\test\Mono.Data.Sqlite.Portable\lib\net4\System.Data.Portable.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-        <Reference Include="System.Transactions.Portable">
-          <HintPath>..\..\packages\test\Mono.Data.Sqlite.Portable\lib\net4\System.Transactions.Portable.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-      </ItemGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <Reference Include="SQLite.Interop">
-          <HintPath>..\..\packages\test\System.Data.SQLite.Core\lib\net46\x64\SQLite.Interop.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-        <Reference Include="SQLite.Interop">
-          <HintPath>..\..\packages\test\System.Data.SQLite.Core\lib\net46\x86\SQLite.Interop.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-        <Reference Include="System.Data.SQLite">
-          <HintPath>..\..\packages\test\System.Data.SQLite.Core\lib\net46\System.Data.SQLite.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
+
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

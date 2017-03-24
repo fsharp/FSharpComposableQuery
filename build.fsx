@@ -104,21 +104,21 @@ Target "CleanDocs" (fun _ ->
 )
 
 Target "SetupSqlite" (fun _ ->
-//if isWindows && not isMono then
-//    let frameworks = ["net40"; "net45"; "net46";"net451"]
-//    frameworks
-//    |> List.iter (fun fwrk ->
-//        let x86source = sprintf "packages/test/System.Data.SQLite.Core/build/%s/x86" fwrk
-//        let x64source = sprintf "packages/test/System.Data.SQLite.Core/build/%s/x64" fwrk
+    if isWindows && not isMono then
+        let frameworks = ["net40"; "net45"; "net46";"net451"]
+        frameworks
+        |> List.iter (fun fwrk ->
+            let x86source = sprintf "packages/test/System.Data.SQLite.Core/build/%s/x86" fwrk
+            let x64source = sprintf "packages/test/System.Data.SQLite.Core/build/%s/x64" fwrk
         
-//        let x64target = sprintf "packages/test/System.Data.SQLite.Core/lib/%s/x64" fwrk
-//        let x86target = sprintf "packages/test/System.Data.SQLite.Core/lib/%s/x86" fwrk
+            let x64target = sprintf "packages/test/System.Data.SQLite.Core/lib/%s/x64" fwrk
+            let x86target = sprintf "packages/test/System.Data.SQLite.Core/lib/%s/x86" fwrk
         
-//        if not (directoryExists x86target) then
-//            CopyDir x86target x86source (fun _ -> true)
-//        if not (directoryExists x64target) then
-//            CopyDir x64target x64source (fun _ -> true)
-//    )
+            if not (directoryExists x86target) then
+                CopyDir x86target x86source (fun _ -> true)
+            if not (directoryExists x64target) then
+                CopyDir x64target x64source (fun _ -> true)
+        )
 
     if isMono then 
         let fullPath = Path.GetFullPath
@@ -164,7 +164,7 @@ Target "SetupSqlite" (fun _ ->
 
 Target "Build" (fun _ ->
 //    let props = [("DocumentationFile", project + ".XML")]   //explicitly generate XML documentation
-    MSBuildRelease buildDir "Build" libraryReferences
+    MSBuildRelease buildDir "Rebuild" libraryReferences
     |> Log "Build-Output: "
 )
 

@@ -19,6 +19,7 @@ open FSharp.Data.Sql
 
 open FSharpComposableQuery
 
+
 module QueryTests = 
 
     let [<Literal>] connectionString = 

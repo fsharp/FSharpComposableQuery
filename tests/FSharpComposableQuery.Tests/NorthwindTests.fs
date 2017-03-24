@@ -1,6 +1,6 @@
 ﻿namespace FSharpComposableQuery.Tests
 
-open Microsoft.FSharp.Data.TypeProviders;
+open FSharp.Data.TypeProviders;
 open NUnit.Framework;
 
 module NorthwindTests =

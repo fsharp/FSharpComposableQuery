@@ -18,8 +18,9 @@ GROUP test
 REDIRECTS: ON
 NUGET
   remote: https://api.nuget.org/v3/index.json
-    FSharp.Data (2.3.2)
-      Zlib.Portable (>= 1.11) - framework: >= netstandard11, portable-net45+sl5+win8, portable-net45+win8, portable-net45+win8+wp8+wpa81
+    FSharp.Core (4.0.0.1) - redirects: force
+    FSharp.Data.TypeProviders (5.0.0.2)
+      FSharp.Core (>= 3.1.2.5)
     Microsoft.NETCore.Platforms (1.1) - framework: >= net463, >= netstandard16
     Microsoft.NETCore.Targets (1.1) - framework: >= net463, >= netstandard16
     Microsoft.Win32.Primitives (4.3) - framework: >= net463, >= netstandard16
@@ -534,4 +535,3 @@ NUGET
       System.Text.Encoding (>= 4.3) - framework: dnxcore50, >= netstandard13
       System.Threading (>= 4.3) - framework: dnxcore50, >= netstandard13
       System.Xml.ReaderWriter (>= 4.3) - framework: dnxcore50, netstandard10, >= netstandard13
-    Zlib.Portable (1.11) - framework: >= netstandard11, portable-net45+sl5+win8, portable-net45+win8, portable-net45+win8+wp8+wpa81

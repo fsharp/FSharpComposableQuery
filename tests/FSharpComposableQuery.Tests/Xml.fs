@@ -12,6 +12,7 @@ open NUnit.Framework
 /// The queries here are further wrapped in quotations to allow for their evaluation in different contexts (see Utils.fs).  
 /// <para> These tests require the schema from sql/xml.sql in a database referred to in app.config </para>
 /// </summary>
+[<TestFixture>]
 module Xml =
 
     let [<Literal>] dbpath = __SOURCE_DIRECTORY__ + @"/../databases/xml.db"

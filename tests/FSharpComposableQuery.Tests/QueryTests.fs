@@ -19,7 +19,7 @@ open FSharp.Data.Sql
 
 open FSharpComposableQuery
 
-
+[<TestFixture>]
 module QueryTests = 
 
     let [<Literal>] connectionString = 

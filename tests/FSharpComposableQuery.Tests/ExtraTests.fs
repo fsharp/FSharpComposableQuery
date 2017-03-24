@@ -5,6 +5,7 @@ open System.Linq
 open FSharpComposableQuery
 open Microsoft.FSharp.Quotations
 
+
 module ExtraTests = 
 
     let private simpleDb = Simple.sql.GetDataContext().Main

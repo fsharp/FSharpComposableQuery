@@ -1,20 +1,19 @@
-﻿namespace FSharpComposableQuery.Tests
-
+﻿namespace global 
 open System
 open System.IO
 open System.Linq
 open Microsoft.FSharp.Linq
 open Microsoft.FSharp.Quotations
 open FSharpComposableQuery
+open NUnit.Framework
+
 #if MONO 
 open Mono.Data.Sqlite
 #else
 open System.Data.SQLite
 #endif
 
-open NUnit.Framework
-
-[<SetUpFixtureAttribute>]
+[<SetUpFixture>]
 type Init () =
     (* 
         Creates new databases with a fresh state based on the sql scripts
@@ -40,11 +39,29 @@ type Init () =
             ()
         printfn "Finished!"
     
-    [<OneTimeSetUpAttribute>]
+    [<OneTimeSetUp>]
     member __.init () = restoreDBs()
-    
-    [<OneTimeTearDownAttribute>]
-    member __.cleanup () = restoreDBs()
+
+
+
+namespace FSharpComposableQuery.Tests
+
+open System
+open System.IO
+open System.Linq
+open Microsoft.FSharp.Linq
+open Microsoft.FSharp.Quotations
+open FSharpComposableQuery
+open NUnit.Framework
+
+#if MONO 
+open Mono.Data.Sqlite
+#else
+open System.Data.SQLite
+#endif
+
+
+
         
 
 

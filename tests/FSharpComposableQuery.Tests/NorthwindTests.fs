@@ -1,8 +1,10 @@
 ﻿namespace FSharpComposableQuery.Tests
 
-open FSharp.Data.TypeProviders;
-open NUnit.Framework;
-
+#if MONO 
+#else
+open FSharp.Data.TypeProviders
+open NUnit.Framework
+[<TestFixture>]
 module NorthwindTests =
     type Northwind = ODataService<"http://services.odata.org/Northwind/Northwind.svc">
     let db = Northwind.GetDataContext()
@@ -36,4 +38,4 @@ module NorthwindTests =
         dbQuery { 
             for x in db.Invoices do yield x 
         } |> ignore
-
+#endif

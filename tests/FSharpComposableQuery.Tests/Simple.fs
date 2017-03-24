@@ -14,6 +14,7 @@ open FSharpComposableQuery
 /// <para>These tests require the schema from sql/simple.sql in a database referred to in app.config </para>
 /// <para>The original queries can be found at http://msdn.microsoft.com/en-us/library/vstudio/hh225374.aspx </para>
 /// </summary>
+[<TestFixture>]
 module Simple = 
 
     let [<Literal>] connectionString = 

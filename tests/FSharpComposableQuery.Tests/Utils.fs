@@ -20,11 +20,14 @@ type Init () =
         Runs before tests to clear detritus that may be created while working with the sqlprovider
         Runs after tests to put the databases back in a state where they'll be usable in editor by the sqlprovider
     *)
+    static let [<Literal>] sqldir = __SOURCE_DIRECTORY__ + "/../sql/"
+    static let [<Literal>] databaseDir = __SOURCE_DIRECTORY__ + "/../databases/"
+
     let restoreDBs () =
         printfn "Restoring DBs to initial state"
-        for f in Directory.EnumerateFiles (__SOURCE_DIRECTORY__ + "../../sql" ) do
+        for f in Directory.EnumerateFiles sqldir do
             let dbname = System.IO.Path.GetFileNameWithoutExtension(f)
-            let dbdir = __SOURCE_DIRECTORY__ + "../../databases"
+            let dbdir = databaseDir
             #if MONO 
             use conn = new SqliteConnection(sprintf "Data Source=%s/%s.db" dbdir dbname)
             #else

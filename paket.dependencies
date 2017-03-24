@@ -21,3 +21,4 @@ group test
     nuget SQLprovider
     nuget Mono.Data.Sqlite.Portable
     nuget System.Data.SQLite.Core
+nuget FSharp.Data

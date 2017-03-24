@@ -2,3 +2,4 @@ FSharp.Core
 group test
 NUnit
 SQLprovider
+FSharp.Data

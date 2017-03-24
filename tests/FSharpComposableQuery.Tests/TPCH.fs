@@ -11,7 +11,12 @@ open FSharp.Data.Sql
 /// </summary>
 module TPCH =
     
-    let [<Literal>] connectionString = "DataSource=" + __SOURCE_DIRECTORY__ + @"/../databases/tpch.db;" + "Version=3;foreign keys = true"
+    let [<Literal>] connectionString = 
+        #if MONO
+        "Data Source=" + __SOURCE_DIRECTORY__ + @"/../databases/tpch.db;" + "Version=3;foreign keys = true"
+        #else
+        "DataSource=" + __SOURCE_DIRECTORY__ + @"/../databases/tpch.db;" + "Version=3;foreign keys = true"
+        #endif
     let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net46"
     type sql = SqlDataProvider<
                 Common.DatabaseProviderTypes.SQLITE

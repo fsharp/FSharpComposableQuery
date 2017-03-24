@@ -13,7 +13,13 @@ open System.Linq
 /// </summary>
 module Nested =
     let [<Literal>] dbpath = __SOURCE_DIRECTORY__ + @"/../databases/organisation.db"
-    let [<Literal>] connectionString = "DataSource=" + dbpath + ";Version=3;foreign keys = true"
+    let [<Literal>] connectionString = 
+    #if MONO
+        "Data Source=" + dbpath + ";Version=3;foreign keys = true"
+    #else 
+        "DataSource=" + dbpath + ";Version=3;foreign keys = true"
+    #endif
+        
     let [<Literal>] resolutionPath = __SOURCE_DIRECTORY__ + @"../../packages/test/System.Data.Sqlite.Core/net46"
     type sql = SqlDataProvider<
                 Common.DatabaseProviderTypes.SQLITE

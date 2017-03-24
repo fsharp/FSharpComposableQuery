@@ -20,10 +20,11 @@ let info =
 // For typical project, no changes are needed below
 // --------------------------------------------------------------------------------------
 
-#I "../../packages/FSharp.Formatting.2.2.3/lib/net40"
-#I "../../packages/RazorEngine.3.3.0/lib/net40/"
-#r "../../packages/Microsoft.AspNet.Razor.2.0.30506.0/lib/net40/System.Web.Razor.dll"
-#r "../../packages/FAKE/tools/FakeLib.dll"
+#I "../../packages/build/FSharp.Formatting/lib/net40"
+#r "../../packages/build/FAKE/tools/FakeLib.dll"
+#r "../../packages/build/FSharpVSPowerTools.Core/lib/net45/FSharpVSPowerTools.Core.dll"
+#r "../../packages/build/FSharp.Compiler.Service/lib/net45/FSharp.Compiler.Service.dll"
+#r "System.Web.Razor.dll"
 #r "RazorEngine.dll"
 #r "FSharp.Literate.dll"
 #r "FSharp.CodeFormat.dll"
@@ -39,36 +40,36 @@ open FSharp.MetadataFormat
 #if RELEASE
 let root = website
 #else
-let root = "file://" + (__SOURCE_DIRECTORY__ @@ "../output")
+let root = "file://" + (__SOURCE_DIRECTORY__ </> "../output")
 #endif
 
 // Paths with template/source/output locations
-let bin        = __SOURCE_DIRECTORY__ @@ "../../bin"
-let content    = __SOURCE_DIRECTORY__ @@ "../content"
-let output     = __SOURCE_DIRECTORY__ @@ "../output"
-let files      = __SOURCE_DIRECTORY__ @@ "../files"
-let templates  = __SOURCE_DIRECTORY__ @@ "templates"
-let formatting = __SOURCE_DIRECTORY__ @@ "../../packages/FSharp.Formatting.2.2.3/"
-let docTemplate = formatting @@ "templates/docpage.cshtml"
+let bin        = __SOURCE_DIRECTORY__ </> "../../bin"
+let content    = __SOURCE_DIRECTORY__ </> "../content"
+let output     = __SOURCE_DIRECTORY__ </> "../output"
+let files      = __SOURCE_DIRECTORY__ </> "../files"
+let templates  = __SOURCE_DIRECTORY__ </> "templates"
+let formatting = __SOURCE_DIRECTORY__ </> "../../packages/build/FSharp.Formatting/"
+let docTemplate = formatting </> "templates/docpage.cshtml"
 
 // Where to look for *.csproj templates (in this order)
 let layoutRoots =
-  [ templates; formatting @@ "templates"
-    formatting @@ "templates/reference" ]
+  [ templates; formatting </> "templates"
+    formatting </> "templates/reference" ]
 
 // Copy static files and CSS + JS from F# Formatting
 let copyFiles () =
   CopyRecursive files output true |> Log "Copying file: "
-  ensureDirectory (output @@ "content")
-  CopyRecursive (formatting @@ "content") (output @@ "content") true 
+  ensureDirectory (output </> "styles")
+  CopyRecursive (formatting </> "styles") (output </> "content") true 
     |> Log "Copying styles and scripts: "
 
 // Build API reference from XML comments
 let buildReference () =
-  CleanDir (output @@ "reference")
+  CleanDir (output </> "reference")
   for lib in referenceBinaries do
     MetadataFormat.Generate
-      ( bin @@ lib, output @@ "reference", layoutRoots, 
+      ( bin </> lib, output </> "reference", layoutRoots, 
         parameters = ("root", root)::info )
 
 // Build documentation from `fsx` and `md` files in `docs/content`
@@ -77,7 +78,7 @@ let buildDocumentation () =
   for dir in Seq.append [content] subdirs do
     let sub = if dir.Length > content.Length then dir.Substring(content.Length + 1) else "."
     Literate.ProcessDirectory
-      ( dir, docTemplate, output @@ sub, replacements = ("root", root)::info,
+      ( dir, docTemplate, output </> sub, replacements = ("root", root)::info,
         layoutRoots = layoutRoots )
 
 // Generate

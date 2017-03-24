@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>FSharpComposableQuery</name></assembly>
+<members>
+<member name="M:FSharpComposableQuery.Common.|IQueryableExtTy|_|(System.Type)">
+ <summary>
+ Checks whether the specified type is or extends from System.Linq.IQueryable&lt;T&gt;
+ </summary>
+ <param name="ty">The type argument </param>
+</member>
+<member name="M:FSharpComposableQuery.HighPriority.RunQueryAsEnumerable``1(FSharpComposableQuery.QueryImpl.QueryBuilder,Microsoft.FSharp.Quotations.FSharpExpr{Microsoft.FSharp.Linq.QuerySource{``0,System.Collections.IEnumerable}})">
+ <summary>
+ A method used to support the F# query syntax. Runs the given quotation as a query using LINQ IEnumerable rules.
+ </summary>
+</member>
+<member name="M:FSharpComposableQuery.LowPriority.RunQueryAsValue``1(FSharpComposableQuery.QueryImpl.QueryBuilder,Microsoft.FSharp.Quotations.FSharpExpr{``0})">
+ <summary>
+ A method used to support the F# query syntax. Runs the given quotation as a query using LINQ rules.
+ </summary>
+</member>
+<member name="M:FSharpComposableQuery.QueryImpl.QueryBuilder.Run``1(Microsoft.FSharp.Quotations.FSharpExpr{Microsoft.FSharp.Linq.QuerySource{``0,System.Linq.IQueryable}})">
+ <summary>
+ A method used to support the F# query syntax. Runs the given quotation as a query using LINQ IQueryable rules.
+ </summary>
+</member>
+<member name="T:FSharpComposableQuery.QueryImpl.QueryBuilder">
+ <summary>
+ The type used to support advanced F# query syntax. Use 'query { ... }' to use the query syntax. 
+ </summary>
+</member>
+<member name="P:FSharpComposableQuery.TopLevelValues.query">
+ <summary>
+ Builds a query using query syntax and operators.
+ </summary>
+</member>
+</members>
+</doc>

@@ -5,40 +5,41 @@ open System.Linq
 open FSharpComposableQuery
 open Microsoft.FSharp.Quotations
 
+
 module ExtraTests = 
 
-    let private simpleDb = Simple.schema.GetDataContext()
-    type simpleTy = Simple.schema.ServiceTypes
+    let private simpleDb = Simple.sql.GetDataContext().Main
+//    type simpleTy = 
 
     let data = [1..10]
     
     let private qVals = 
         [|
-            <@ fun (age:int) -> query { for s in simpleDb.Student do all(s.Age.HasValue) } @>
+            <@ fun (age:int) -> query { for s in simpleDb.Student do all(s.Age >= 0) } @>
             <@ fun (age:int) -> query { for s in simpleDb.Student do contains(simpleDb.Student.First()) } @>
-            <@ fun (age:int) -> query { for s in simpleDb.Student do exists(s.Age.HasValue) } @>
+            <@ fun (age:int) -> query { for s in simpleDb.Student do exists(s.Age >= 0) } @>
         |]
 
     let private qEnum = <@ fun id -> query { for i in data do if i < id then select i } @>
     let private qQuery = <@ fun (age:int) -> query { for s in simpleDb.Student do if not (s.Age.Equals(age)) then yield s } @>
 
 
-    let private qValueUseValue i = <@ query { for s in simpleDb.Student do if (s.Age.HasValue = ((%qVals.[i]) 15)) then count } @>
+    let private qValueUseValue i = <@ query { for s in simpleDb.Student do if ((s.Age >= 0) = ((%qVals.[i]) 15)) then count } @>
     let private qQueryUseQuery = <@ query { for s in ((%qQuery) 16) do yield s } @>
 
     let private qValueUseQuery = <@ query { for s in ((%qQuery) 16) do count } @>
-    let private qQueryUseValue i = <@ query { for s in simpleDb.Student do if (s.Age.HasValue = ((%qVals.[i]) 15)) then yield s } @>
+    let private qQueryUseValue i = <@ query { for s in simpleDb.Student do if ((s.Age >= 0) = ((%qVals.[i]) 15)) then yield s } @>
 
 
-    let private nStudents = <@ fun (src:Data.Linq.Table<simpleTy.Student>) -> query { for y in src do count } @>
+//    let private nStudents = <@ fun (src:Data.Linq.Table<simpleTy.Student>) -> query { for y in src do count } @>
     
     let private existsName = <@ fun n -> query { for y in simpleDb.Student do exists(y.Name = n) } @>
     
-    let private findUnique = <@ fun (src:Data.Linq.Table<simpleTy.Student>) -> query {
-                for z in src do
-                    if not ((%existsName) z.Name) then
-                        yield z
-        } @>
+//    let private findUnique = <@ fun (src:Data.Linq.Table<simpleTy.Student>) -> query {
+//                for z in src do
+//                    if not ((%existsName) z.Name) then
+//                        yield z
+//        } @>
 
     
 

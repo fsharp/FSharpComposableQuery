@@ -1,0 +1,25 @@
+source https://api.nuget.org/v3/index.json
+redirects: on
+
+nuget FSharp.Core 4.0.0.1 redirects: force
+
+group build
+    source https://api.nuget.org/v3/index.json
+
+    nuget FAKE
+    nuget FSharp.Formatting
+    nuget FSharpVSPowerTools.Core 2.3.0.0
+
+
+group test
+    source https://api.nuget.org/v3/index.json
+    source https://www.nuget.org/api/v2
+    redirects: on
+    
+    nuget FSharp.Core 4.0.0.1 redirects: force
+    nuget Nunit 
+    nuget NUnit.Console
+    nuget SQLprovider
+    nuget Mono.Data.Sqlite.Portable
+    nuget System.Data.SQLite.Core
+    nuget FSharp.Data.TypeProviders

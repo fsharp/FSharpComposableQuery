@@ -1,42 +1,41 @@
 ﻿namespace FSharpComposableQuery.Tests
 
-open Microsoft.FSharp.Data.TypeProviders;
-open NUnit.Framework;
-
+#if MONO 
+#else
+open FSharp.Data.TypeProviders
+open NUnit.Framework
+[<TestFixture>]
 module NorthwindTests =
     type Northwind = ODataService<"http://services.odata.org/Northwind/Northwind.svc">
     let db = Northwind.GetDataContext()
 
     // Some tests to compare 
-
     let dbQuery =  FSharpComposableQuery.TopLevelValues.query
 
-    [<TestFixture>]
-    type TestClass() = 
-        [<Test>]
-        member x.queryCustomers () = 
-            // A query expression.
-            let _ = query { for x in db.Customers do
-                            yield x }
-            ()
+    [<Test>]
+    let queryCustomers () = 
+        // A query expression.
+        query { 
+            for x in db.Customers do yield x 
+        } |> ignore
 
-        [<Test>]
-        member x.dbQueryCustomers () = 
-            // A query expression.
-            let _ = dbQuery { for x in db.Customers do
-                              yield x }
-            ()
+    [<Test>]
+    let dbQueryCustomers () = 
+        // A query expression.
+        dbQuery { 
+            for x in db.Customers do yield x 
+        }|> ignore
 
-        [<Test>]
-        member x.queryInvoices () = 
-            // A query expression.
-            let _ = query { for x in db.Invoices do
-                            yield x }
-            ()
+    [<Test>]
+    let queryInvoices () = 
+        // A query expression.
+        query { 
+            for x in db.Invoices do yield x 
+        }|> ignore
 
-        [<Test>]
-        member x.dbQueryInvoices () = 
-            let query2 = dbQuery { for x in db.Invoices do
-                                   yield x }
-            ()
-
+    [<Test>]
+    let dbQueryInvoices () = 
+        dbQuery { 
+            for x in db.Invoices do yield x 
+        } |> ignore
+#endif

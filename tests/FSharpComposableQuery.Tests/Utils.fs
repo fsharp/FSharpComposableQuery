@@ -1,11 +1,72 @@
-﻿namespace FSharpComposableQuery.Tests
-
+﻿namespace global 
 open System
+open System.IO
 open System.Linq
-open System.Reflection
 open Microsoft.FSharp.Linq
 open Microsoft.FSharp.Quotations
 open FSharpComposableQuery
+open NUnit.Framework
+
+#if MONO 
+open Mono.Data.Sqlite
+#else
+open System.Data.SQLite
+#endif
+
+[<SetUpFixture>]
+type Init () =
+    (* 
+        Creates new databases with a fresh state based on the sql scripts
+        Runs before tests to clear detritus that may be created while working with the sqlprovider
+        Runs after tests to put the databases back in a state where they'll be usable in editor by the sqlprovider
+    *)
+    static let [<Literal>] sqldir = __SOURCE_DIRECTORY__ + "/../sql/"
+    static let [<Literal>] databaseDir = __SOURCE_DIRECTORY__ + "/../databases/"
+
+    let restoreDBs () =
+        printfn "Restoring DBs to initial state"
+        for f in Directory.EnumerateFiles sqldir do
+            let dbname = System.IO.Path.GetFileNameWithoutExtension(f)
+            let dbdir = databaseDir
+            #if MONO 
+            use conn = new SqliteConnection(sprintf "Data Source=%s/%s.db" dbdir dbname)
+            #else
+            use conn = new SQLiteConnection(sprintf "DataSource=%s/%s.db" dbdir dbname)
+            #endif
+            conn.Open()
+            printfn "Creating db: %s" dbname
+            let scriptTxt = File.ReadAllText f
+            use cmd = conn.CreateCommand()
+            cmd.CommandText <- scriptTxt
+            use rdr = cmd.ExecuteReader()
+            ()
+        printfn "Finished!"
+    
+    [<OneTimeSetUp>]
+    member __.init () = restoreDBs()
+
+
+
+namespace FSharpComposableQuery.Tests
+
+open System
+open System.IO
+open System.Linq
+open Microsoft.FSharp.Linq
+open Microsoft.FSharp.Quotations
+open FSharpComposableQuery
+open NUnit.Framework
+
+#if MONO 
+open Mono.Data.Sqlite
+#else
+open System.Data.SQLite
+#endif
+
+
+
+        
+
 
 module QueryBuilders = 
     let FSharp3 = ExtraTopLevelOperators.query
@@ -60,7 +121,8 @@ module ExprUtils =
                 match e1 with
                 | Some e1 -> Expr.PropertySet(tExp e1, pi, tExp e2, tList l)
                 | None -> Expr.PropertySet(pi, tExp e2, tList l)
-            | Patterns.Quote(e1) -> Expr.Quote(tExp e1)
+            | Patterns.QuoteTyped(e1) -> Expr.QuoteTyped(tExp e1)
+            | Patterns.QuoteRaw(e1) -> Expr.QuoteRaw(tExp e1)
             | Patterns.Sequential(e1, e2) -> Expr.Sequential(tExp e1, tExp e2)
             | Patterns.TryFinally(e1, e2) -> Expr.TryFinally(tExp e1, tExp e2)
             | Patterns.TryWith(e1, v1, e2, v2, e3) -> Expr.TryWith(tExp e1, v1, tExp e2, v2, tExp e3)
@@ -151,8 +213,10 @@ type Utils() =
     // Gets the body of an expression of the type "query { <body> }"
     static let extractBodyRaw(e:Expr<'T>) =
         match e with
-        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(Some _, mi, [Patterns.Quote(q)])), _)
-        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(None,   mi, [_; Patterns.Quote(q)])), _) ->
+        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(Some _, mi, [Patterns.QuoteRaw(q)])), _)
+        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(Some _, mi, [Patterns.QuoteTyped(q)])), _)
+        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(None,   mi, [_; Patterns.QuoteRaw(q)])), _)
+        | Patterns.Application (Patterns.Lambda(_, Patterns.Call(None,   mi, [_; Patterns.QuoteTyped(q)])), _) ->
             q
         | _ ->
             failwith "Unable to find an outermost query expression"

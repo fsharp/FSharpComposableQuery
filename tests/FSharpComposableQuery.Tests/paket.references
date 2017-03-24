@@ -1,0 +1,5 @@
+group test
+FSharp.Core
+NUnit
+SQLprovider
+FSharp.Data.TypeProviders
